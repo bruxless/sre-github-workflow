@@ -29,7 +29,6 @@ on:
 
 jobs:
   deploy:
-    env:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
