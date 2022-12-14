@@ -5,26 +5,25 @@ on:
     inputs:
       docker_directory:
         required: true
-        type: sting
-      ecr_repository:
+        type: string
+      dockerfile_path:
         required: true
         type: string
       java_version:
         type: string
-        required: true
+        default: '11'
 
 jobs:
   build_test:
-    env:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Set up JDK ${{ github.event.inputs.java_version }}
+      - name: Set up JDK ${{ inputs.java_version }}
         uses: actions/setup-java@v3
         with:
-          java-version: '${{ github.event.inputs.java_version }}'
+          java-version: ${{ inputs.java_version }}
           distribution: 'temurin'
-          #cache: maven
+          cache: maven
       - name: Retrieve project version
         id: get_version
         run: |
@@ -42,14 +41,13 @@ jobs:
         env:
           # actions/setup-java@v1 changes JAVA_HOME, so it needs to be reset to match the Dependency check image
           JAVA_HOME: /opt/jdk
-        id: Dependency check
         with:
           project: 'test'
           path: '.'
           format: 'HTML'
           out: 'reports' # this is the default, no need to specify unless you wish to override it
+          # --failOnCVSS (number) if you want to fail on Dependency check
           args: >
-            --failOnCVSS 7
             --enableRetired
       - name: Upload Test results
         if: ${{ always() }}
@@ -59,4 +57,4 @@ jobs:
           path: ${{github.workspace}}/reports
       - name: Docker build
         run: |
-          docker build -f ${{ github.event.inputs.docker_directory }}/target/Dockerfile ${{ github.event.inputs.docker_directory }}/target -t $ECR_REPOSITORY:$PROJECT_VERSION
+          docker build -f ${{ inputs.dockerfile_path }}/Dockerfile ${{ inputs.docker_directory }} -t ${{ github.event.repository.name }}:$PROJECT_VERSION
