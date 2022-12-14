@@ -34,18 +34,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Set up JDK ${{ inputs.java_version }}
-        if: ${{ inputs.java_project == 'true' }}
+        if: ${{ inputs.java_project == true }}
         uses: actions/setup-java@v3
         with:
           java-version: ${{ inputs.java_version }}
           distribution: 'temurin'
           cache: maven
       - name: Retrieve project version
-        if: ${{ inputs.java_project == 'true' }}
+        if: ${{ inputs.java_project == true }}
         run: |
           echo "PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout  --file pom.xml)" >> $GITHUB_ENV
       - name: Maven install
-        if: ${{ inputs.java_project == 'true' }}
+        if: ${{ inputs.java_project == true }}
         run: mvn -B install -Pdocker -DskipTests=true --file pom.xml
       - name: Docker build
         run: |
