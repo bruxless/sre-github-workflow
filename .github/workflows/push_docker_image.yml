@@ -1,0 +1,55 @@
+name: Push docker artifact
+
+on:
+  workflow_call:
+    inputs:
+      docker_directory:
+        required: true
+        type: sting
+      ecr_repository:
+        required: true
+        type: string
+      java_version:
+        type: string
+        required: true
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+        type: sting
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+        type: sting
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    env:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up JDK ${{ github.event.inputs.java_version }}
+        uses: actions/setup-java@v3
+        with:
+          java-version: '${{ github.event.inputs.java_version }}'
+          distribution: 'temurin'
+          cache: maven
+      - name: Retrieve project version
+        id: get_version
+        run: |
+          echo "PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout  --file pom.xml)" >> $GITHUB_ENV
+      - name: Maven install
+        run: mvn -B install -Pdocker -DskipTests=true --file pom.xml
+      - name: Docker build
+        run: |
+          docker build -f ${{ github.event.inputs.docker_directory }}/target/Dockerfile ${{ github.event.inputs.docker_directory }}/target -t ${{ github.event.inputs.ecr_repository }}:$PROJECT_VERSION
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+      - name: Push image on ECR
+        run: |
+          aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin ${{ github.event.inputs.ecr_repository }}
+          docker push ${{ github.event.inputs.ecr_repository }}:$PROJECT_VERSION
