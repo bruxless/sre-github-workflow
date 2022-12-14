@@ -29,7 +29,6 @@ on:
 
 jobs:
   deploy:
-    if: ${{ workflow_run.conclusion == 'success' }}
     env:
     runs-on: ubuntu-latest
     steps:
