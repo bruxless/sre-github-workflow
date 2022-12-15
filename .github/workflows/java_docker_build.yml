@@ -27,7 +27,7 @@ jobs:
       - name: Retrieve project version
         id: get_version
         run: |
-          echo "::set-output name=project_version::$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout  --file pom.xml)"
+          echo "project_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout  --file pom.xml)" >> $GITHUB_OUTPUT
       - name: Maven compile
         run: mvn -B compile --file pom.xml
       - name: Maven integration test
@@ -39,7 +39,7 @@ jobs:
       - name: Docker build
         run: |
           docker build -f ${{ inputs.dockerfile_path }}/Dockerfile ${{ inputs.docker_context_path }} -t ${{ github.event.repository.name }}:${{ steps.get_version.outputs.project_version }}"
-      - name:
+      - name: Retrieve Trivy html tpl
         run: |
           wget https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -O ./.github/html.tpl
       - name: Run Trivy vulnerability scanner
