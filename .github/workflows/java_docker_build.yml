@@ -53,6 +53,7 @@ jobs:
           output: "trivy_report.html"
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
+          security-checks: 'vuln'
       - name: Upload Test results
         if: ${{ always() }}
         uses: actions/upload-artifact@master
