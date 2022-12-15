@@ -38,7 +38,7 @@ jobs:
         run: mvn -B install -Pdocker -DskipTests=true --file pom.xml
       - name: Docker build
         run: |
-          docker build -f ${{ inputs.dockerfile_path }}/Dockerfile ${{ inputs.docker_context_path }} -t ${{ github.event.repository.name }}:${{ steps.get_version.outputs.project_version }}"
+          docker build -f ${{ inputs.dockerfile_path }}/Dockerfile ${{ inputs.docker_context_path }} -t ${{ github.event.repository.name }}:${{ steps.get_version.outputs.project_version }}
       - name: Retrieve Trivy html tpl
         run: |
           wget https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -O ./.github/html.tpl
