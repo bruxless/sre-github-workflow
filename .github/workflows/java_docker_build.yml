@@ -45,7 +45,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: '${{ github.event.repository.name }}:$PROJECT_VERSION'
+          image-ref: '${{ github.event.repository.name }}:${{ env.PROJECT_VERSION }}'
           format: 'template'
           template: '@.github/html.tpl'
           exit-code: '1'
