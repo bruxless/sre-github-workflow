@@ -28,7 +28,7 @@ on:
         required: true
 
 jobs:
-  deploy:
+  push_docker_image:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

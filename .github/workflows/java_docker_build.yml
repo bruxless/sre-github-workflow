@@ -3,7 +3,7 @@ name: Build
 on:
   workflow_call:
     inputs:
-      docker_directory:
+      docker_context_path:
         required: true
         type: string
       dockerfile_path:
@@ -36,25 +36,26 @@ jobs:
         run: mvn -B test --file pom.xml
       - name: Maven install
         run: mvn -B install -Pdocker -DskipTests=true --file pom.xml
-      - name: Dependency check
-        uses: dependency-check/Dependency-Check_Action@main
-        env:
-          # actions/setup-java@v1 changes JAVA_HOME, so it needs to be reset to match the Dependency check image
-          JAVA_HOME: /opt/jdk
+      - name: Docker build
+        run: |
+          docker build -f ${{ inputs.dockerfile_path }}/Dockerfile ${{ inputs.docker_context_path }} -t ${{ github.event.repository.name }}:$PROJECT_VERSION
+      - name:
+        run: |
+          wget https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -O ./.github/html.tpl
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
         with:
-          project: 'test'
-          path: '.'
-          format: 'HTML'
-          out: 'reports' # this is the default, no need to specify unless you wish to override it
-          # --failOnCVSS (number) if you want to fail on Dependency check
-          args: >
-            --enableRetired
+          image-ref: '${{ github.event.repository.name }}:$PROJECT_VERSION'
+          format: 'template'
+          template: '@.github/html.tpl'
+          exit-code: '1'
+          ignore-unfixed: true
+          output: "trivy_report.html"
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
       - name: Upload Test results
         if: ${{ always() }}
         uses: actions/upload-artifact@master
         with:
           name: Dependency check report
-          path: ${{github.workspace}}/reports
-      - name: Docker build
-        run: |
-          docker build -f ${{ inputs.dockerfile_path }}/Dockerfile ${{ inputs.docker_directory }} -t ${{ github.event.repository.name }}:$PROJECT_VERSION
+          path: ${{github.workspace}}/trivy_report.html
