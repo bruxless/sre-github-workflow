@@ -27,25 +27,25 @@ jobs:
       - name: Retrieve project version
         id: get_version
         run: |
-          echo "PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout  --file pom.xml)" >> $GITHUB_ENV
+          echo "::set-output name=project_version::$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout  --file pom.xml)"
       - name: Maven compile
         run: mvn -B compile --file pom.xml
       - name: Maven integration test
         run: mvn -B integration-test --file pom.xml
-      - name: Maven integration test
+      - name: Maven unit test
         run: mvn -B test --file pom.xml
       - name: Maven install
         run: mvn -B install -Pdocker -DskipTests=true --file pom.xml
       - name: Docker build
         run: |
-          docker build -f ${{ inputs.dockerfile_path }}/Dockerfile ${{ inputs.docker_context_path }} -t ${{ github.event.repository.name }}:$PROJECT_VERSION
+          docker build -f ${{ inputs.dockerfile_path }}/Dockerfile ${{ inputs.docker_context_path }} -t ${{ github.event.repository.name }}:${{ steps.get_version.outputs.project_version }}"
       - name:
         run: |
           wget https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -O ./.github/html.tpl
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: '${{ github.event.repository.name }}:${{ env.PROJECT_VERSION }}'
+          image-ref: '${{ github.event.repository.name }}:${{ steps.get_version.outputs.project_version }}'
           format: 'template'
           template: '@.github/html.tpl'
           exit-code: '1'
