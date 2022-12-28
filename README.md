@@ -2,14 +2,14 @@
 
 
 ## Workflow available
-- [Java docker build](.github/workflows/java_docker_build.yml)
-- [Link PR to Asana Ticket](.github/workflows/link-pr-with-asana.yml)
-- [Push docker image on AWS registry](.github/workflows/push_docker_image.yml)
+- [Java docker build](#java-docker-build)
+- [Link PR to Asana Ticket](#link-pr-to-asana-ticket)
+- [Push docker image on AWS registry](#push-docker-image-on-aws-registry)
 
 ## Usage
 
 ### Java docker build
-
+[Source](.github/workflows/java_docker_build.yml)
 #### Parameters
 
 | Parameter Name        | Type   | Required                   | Description                                      |
@@ -51,7 +51,7 @@ jobs:
 ```
 
 ### Link PR to Asana Ticket
-
+[Source](.github/workflows/link-pr-with-asana.yml)
 #### Parameters
 
 | Parameter Name    | Type   | Required                   | Description                                     |
@@ -78,7 +78,7 @@ jobs:
 ```
 
 ### Push docker image on AWS registry
-
+[Source](.github/workflows/push_docker_image.yml)
 #### Parameters
 
 | Parameter Name          | Type    | Required                      | Description                                                                                            |
