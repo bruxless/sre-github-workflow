@@ -1,4 +1,4 @@
-name: Build
+name: Build Java & Docker
 
 on:
   workflow_call:
