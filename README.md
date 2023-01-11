@@ -1,7 +1,7 @@
 # Reusable Github workflow for Bruxless
 
-
 ## Workflow available
+
 - [Java docker build](#java-docker-build)
 - [Link PR to Asana Ticket](#link-pr-to-asana-ticket)
 - [Push docker image on AWS registry](#push-docker-image-on-aws-registry)
@@ -9,7 +9,9 @@
 ## Usage
 
 ### Java docker build
+
 [Source](.github/workflows/java_docker_build.yml)
+
 #### Parameters
 
 | Parameter Name        | Type   | Required                   | Description                                      |
@@ -18,7 +20,8 @@
 | `dockerfile_path`     | string | true                       | The path to Dockerfile (e.g foo/bar/Dockerfile). |
 | `java_version`        | string | false : default value `11` | The java version used to build java project.     |
 
-#### Example 
+#### Example
+
 ```
 name: Build
 #Might be updated to :
@@ -43,7 +46,7 @@ on:
 
 jobs:
   build_test:
-    uses: bruxless/github_workflow/.github/workflows/java_docker_build.yml@master
+    uses: bruxless/sre-github-workflow/.github/workflows/java_docker_build.yml@master
     with:
       docker_directory: 'foo-service/target'
       dockerfile_path: 'foo-service/target'
@@ -51,14 +54,17 @@ jobs:
 ```
 
 ### Link PR to Asana Ticket
+
 [Source](.github/workflows/link-pr-with-asana.yml)
+
 #### Parameters
 
-| Parameter Name    | Type   | Required                   | Description                                     |
-|-------------------|--------|----------------------------|-------------------------------------------------|
-| `ASANA_SECRET`    | secret | true                       | The secret key given by Asana                   |
+| Parameter Name | Type   | Required | Description                   |
+|----------------|--------|----------|-------------------------------|
+| `ASANA_SECRET` | secret | true     | The secret key given by Asana |
 
-#### Example 
+#### Example
+
 ```
 name: Link PR with Asana
 
@@ -72,13 +78,15 @@ jobs:
   asana_link_with_pr:
     # Asana link is disabled when we do not found asana link in PR's body
     if: contains(github.event.pull_request.body, 'https://app.asana.com')
-    uses: bruxless/github_workflow/.github/workflows/link-pr-with-asana.yml@master
+    uses: bruxless/sre-github-workflow/.github/workflows/link-pr-with-asana.yml@master
     secrets:
       ASANA_SECRET: ${{ secrets.ASANA_SECRET }}
 ```
 
 ### Push docker image on AWS registry
+
 [Source](.github/workflows/push_docker_image.yml)
+
 #### Parameters
 
 | Parameter Name          | Type    | Required                      | Description                                                                                            |
@@ -92,6 +100,7 @@ jobs:
 | `AWS_SECRET_ACCESS_KEY` | secret  | true                          | The AWS secret access id                                                                               |
 
 #### Example
+
 ```
 name: Push docker image
 on:
@@ -105,7 +114,7 @@ on:
 jobs:
   deploy:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    uses: bruxless/github_workflow/.github/workflows/push_docker_image.yml@master
+    uses: bruxless/sre-github-workflow/.github/workflows/push_docker_image.yml@master
     with:
       docker_directory: 'foo-service/target'
       dockerfile_path: 'foo-service/target'
