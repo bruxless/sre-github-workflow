@@ -11,7 +11,7 @@ on:
         type: string
       java_version:
         type: string
-        default: '11'
+        default: '17'
       java_project:
         type: boolean
         default: false

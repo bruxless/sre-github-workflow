@@ -18,7 +18,7 @@
 |-----------------------|--------|----------------------------|--------------------------------------------------|
 | `docker_context_path` | string | true                       | The path of the docker context.                  |
 | `dockerfile_path`     | string | true                       | The path to Dockerfile (e.g foo/bar/Dockerfile). |
-| `java_version`        | string | false : default value `11` | The java version used to build java project.     |
+| `java_version`        | string | false : default value `17` | The java version used to build java project.     |
 
 #### Example
 
@@ -93,7 +93,7 @@ jobs:
 |-------------------------|---------|-------------------------------|--------------------------------------------------------------------------------------------------------|
 | `docker_context_path`   | string  | true                          | The path of the docker context.                                                                        |
 | `dockerfile_path`       | string  | true                          | The path to Dockerfile (e.g foo/bar/Dockerfile).                                                       |
-| `java_version`          | string  | false : default value `11`    | The java version used to build java project.                                                           |
+| `java_version`          | string  | false : default value `17`    | The java version used to build java project.                                                           |
 | `java_project`          | boolean | false : default value `false` | If true, this job package mvn project, in order to build docker image. Otherwise java build is skipped |
 | `ecr_repository`        | string  | true                          | The registry arn (eg `00000000.dkr.ecr.eu-west-3.amazonaws.com/registry_name`)                         |
 | `AWS_ACCESS_KEY_ID`     | secret  | true                          | The AWS access key id                                                                                  |
@@ -123,5 +123,25 @@ jobs:
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+```
+
+### Create releases 
+
+[Source](.github/workflows/maven_release.yml)
+
+#### Parameters
+
+| Parameter Name          | Type    | Required                       | Description                                                                |
+|-------------------------|---------|--------------------------------|----------------------------------------------------------------------------|
+| `source_branch`         | string  | false: default value `develop` | The source branch, ie. the branch that contains next code.                 |
+| `destination_branch`    | string  | false: default value `main`    | The destination branch, ie. the branch that will contains new code.        |
+| `source_version`        | string  | false : default value ``       | Used to force the version of the source branch AFTER release process.      |
+| `destination_version`   | boolean | false : default value ``       | Used to force the version of the destination branch AFTER release process. |
+| `java_version`          | string  | false : default value `17`     | The java version used to build java project.                               |
+
+#### Example
+
+```
 
 ```
