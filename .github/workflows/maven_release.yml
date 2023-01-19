@@ -1,4 +1,4 @@
-name: Release
+name: Maven Release
 
 on:
   workflow_call:
@@ -20,7 +20,7 @@ on:
         default: '17'
 
 jobs:
-  release:
+  maven_release:
     runs-on: ubuntu-latest
     steps:
 
