@@ -35,8 +35,8 @@ name: Build
 #    push:
 #      branches:
 #        - "develop"
-#        - "master"
-#        - "master/**"
+#        - "main"
+#        - "main/**"
 #        - "develop/**"
 
 on:
@@ -46,7 +46,7 @@ on:
 
 jobs:
   build_test:
-    uses: bruxless/sre-github-workflow/.github/workflows/java_docker_build.yml@master
+    uses: bruxless/sre-github-workflow/.github/workflows/java_docker_build.yml@main
     with:
       docker_directory: 'foo-service/target'
       dockerfile_path: 'foo-service/target'
@@ -78,7 +78,7 @@ jobs:
   asana_link_with_pr:
     # Asana link is disabled when we do not found asana link in PR's body
     if: contains(github.event.pull_request.body, 'https://app.asana.com')
-    uses: bruxless/sre-github-workflow/.github/workflows/link-pr-with-asana.yml@master
+    uses: bruxless/sre-github-workflow/.github/workflows/link-pr-with-asana.yml@main
     secrets:
       ASANA_SECRET: ${{ secrets.ASANA_SECRET }}
 ```
@@ -107,14 +107,14 @@ on:
   workflow_run:
     workflows: ["Build"]
     branches:
-      - "master"
-      - "master/**"
+      - "main"
+      - "main/**"
     types:
       - completed
 jobs:
   deploy:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    uses: bruxless/sre-github-workflow/.github/workflows/push_docker_image.yml@master
+    uses: bruxless/sre-github-workflow/.github/workflows/push_docker_image.yml@main
     with:
       docker_directory: 'foo-service/target'
       dockerfile_path: 'foo-service/target'
