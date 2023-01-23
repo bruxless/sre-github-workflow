@@ -30,10 +30,10 @@ jobs:
           echo "project_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout  --file pom.xml)" >> $GITHUB_OUTPUT
       - name: Maven compile
         run: mvn -B compile --file pom.xml
-      - name: Maven integration test
-        run: mvn -B integration-test --file pom.xml
       - name: Maven unit test
         run: mvn -B test --file pom.xml
+      - name: Maven integration test
+        run: mvn -B integration-test --file pom.xml
       - name: Maven install
         run: mvn -B install -Pdocker -DskipTests=true --file pom.xml
       - name: Docker build
