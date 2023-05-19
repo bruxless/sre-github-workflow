@@ -47,6 +47,14 @@ on:
         type: string
         required: false
         default: "eu-west-1"
+      ecr_url:
+        description: "The ECR url"
+        type: string
+        required: true
+      chart_museum_url:
+        description: "The ChartMuseum URL"
+        type: string
+        required: true
       enable_trivy_exit:
         description: "Enable Trivy failure when CVE are found, you can deactivate this behavior"
         type: boolean
@@ -417,7 +425,7 @@ jobs:
           contains('refs/heads/main', github.ref) ||
           contains('refs/heads/release', github.ref)
         run: |
-          helm repo add bruxless ${{ env.chart_museum_url }}
+          helm repo add bruxless ${{ inputs.chart_museum_url }}
       
       # Push Helm chart on S3 if master or release branches
       - name: Push charts on S3
