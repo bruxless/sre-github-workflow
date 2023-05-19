@@ -26,9 +26,11 @@ on:
       destination_version:
         description: "The version of the destination branch AFTER release (if not set SNAPSHOT will be removed)"
         type: string
+        required: false
       source_version:
         description: "The version of the source branch AFTER release (if not set : X.Y.Z+1-SNAPSHOT)"
         type: string
+        required: false
       dry_run:
         description: "Do not really push"
         type: boolean
