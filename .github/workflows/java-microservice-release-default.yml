@@ -1,7 +1,7 @@
 name: Release maven microservice
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       java_distribution:
         description: "The java distribution (default to temurin)"
