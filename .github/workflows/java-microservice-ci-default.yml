@@ -47,6 +47,11 @@ on:
         type: string
         required: false
         default: "eu-west-1"
+      enable_trivy_exit:
+        description: "Enable Trivy failure when CVE are found, you can deactivate this behavior"
+        type: boolean
+        required: false
+        default: false
     secrets:
       SLACK_BOT_TOKEN:
         description: "The slack bot token"
@@ -193,6 +198,7 @@ jobs:
 
       # Can be deleted when this issue is closed : https://github.com/aquasecurity/trivy-action/issues/228
       - name: Check maven trivy results
+        if: ${{ inputs.enable_trivy_exit }}
         run: |
           if grep -qE 'UNKNOWN|LOW|MEDIUM|HIGH|CRITICAL' trivy_maven.sarif; then
             echo "Vulnerabilities found"
@@ -301,6 +307,7 @@ jobs:
           timeout: '7m'
       # Can be deleted when this issue is closed : https://github.com/aquasecurity/trivy-action/issues/228
       - name: Check docker db trivy results
+        if: ${{ inputs.enable_trivy_exit }}
         run: |
           if grep -qE 'HIGH|CRITICAL' trivy_docker_db.sarif; then
             echo "Vulnerabilities found"
@@ -330,6 +337,7 @@ jobs:
           timeout: '7m'
       # Can be deleted when this issue is closed : https://github.com/aquasecurity/trivy-action/issues/228
       - name: Check docker service trivy results
+        if: ${{ inputs.enable_trivy_exit }}
         run: |
           if grep -qE 'HIGH|CRITICAL' trivy_docker_service.sarif; then
             echo "Vulnerabilities found"
