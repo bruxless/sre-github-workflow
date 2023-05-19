@@ -1,0 +1,159 @@
+name: Release maven microservice
+
+on:
+  workflow_dispatch:
+    inputs:
+      java_distribution:
+        description: "The java distribution (default to temurin)"
+        type: string
+        required: false
+        default: "temurin"
+      java_version:
+        description: "The java version (default to 17)"
+        type: string
+        required: false
+        default: "17"
+      source_branch:
+        description: "The source branch, that will contains the next release"
+        type: string
+        required: true
+        default: "develop"
+      destination_branch:
+        description: "The destination branch, that will contain the created release"
+        type: string
+        required: true
+        default: "main"
+      destination_version:
+        description: "The version of the destination branch AFTER release (if not set SNAPSHOT will be removed)"
+        type: string
+      source_version:
+        description: "The version of the source branch AFTER release (if not set : X.Y.Z+1-SNAPSHOT)"
+        type: string
+      dry_run:
+        description: "Do not really push"
+        type: boolean
+        default: true
+      github_app_id:
+        description: "GitHub app id"
+        type: string
+        required: true
+    secrets:
+      BRUXLESS_GH_APP_KEY:
+        description: "The Bruxless GitHub App key"
+        required: true
+
+jobs:
+  release:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: retrieve bruxless github apps token
+        id: bruxless-action
+        uses: getsentry/action-github-app-token@v2
+        with:
+          app_id: ${{ inputs.github_app_id }}
+          private_key: ${{ secrets.BRUXLESS_GH_APP_KEY }}
+
+      ### Destination branch part
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ steps.bruxless-action.outputs.token }}
+
+      # Setup Java
+      - name: Set up JDK ${{ inputs.java_distribution }}/${{ inputs.java_version }}
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ inputs.java_version }}
+          distribution: ${{ inputs.java_distribution }}
+          cache: maven
+
+      - name: Configure git
+        run: |
+          git config user.name bruxless-actions
+          git config user.email github-actions@bruxless.com
+
+      - name: Pull
+        run: |
+          git pull --all
+
+      - name: Checkout ${{ inputs.destination_branch }}
+        run: |
+          git checkout ${{ inputs.destination_branch }}
+
+      - name: Merge ${{ inputs.source_branch }} into ${{ inputs.destination_branch }}
+        run: |
+          git merge --no-ff origin/${{ inputs.source_branch }}
+
+      - name: Bump automatically ${{ inputs.destination_branch }} branch version
+        if: ${{ inputs.destination_version == '' }}
+        run: |
+          mvn -B versions:set -Pci -DgenerateBackupPoms=false -DremoveSnapshot --file pom.xml
+
+      - name: Bump manually ${{ inputs.destination_branch }} branch version
+        if: ${{ inputs.destination_version != '' }}
+        run: |
+          mvn -B versions:set -Pci -DgenerateBackupPoms=false -DnewVersion=${{ inputs.destination_version }} --file pom.xml
+
+      - name: Retrieve ${{ inputs.destination_branch }} branch version
+        id: get_destination_version
+        run: |
+          echo "destination_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout  --file pom.xml)" >> $GITHUB_OUTPUT
+
+      - name: Check if CHANGELOG have been updated
+        run: |
+          grep "\[${{ steps.get_destination_version.outputs.destination_version }}\]" CHANGELOG.md || { echo "CHANGELOG should be updated" ; exit 1 ;}
+
+      - name: Update README.md on ${{ inputs.destination_branch }} branch
+        run: |
+          sed -i "s/> version.*/> version: ${{ steps.get_destination_version.outputs.destination_version }}/g" README.md
+
+      - name: Commit and tag on ${{ inputs.destination_version }} branch
+        run: |
+          git add .
+          git commit -m "Updating to version '${{ steps.get_destination_version.outputs.destination_version }}'"
+          git tag -a ${{ steps.get_destination_version.outputs.destination_version }} -m "tag version '${{ steps.get_destination_version.outputs.destination_version }}'"
+
+      - name: Push on ${{ inputs.destination_version }} branch
+        if: ${{ ! inputs.dry_run }}
+        run: |
+          git push --tags --follow-tags origin ${{ inputs.destination_branch }}
+      ## ------------------
+      ### Updates source part
+
+      - name: Checkout ${{ inputs.source_branch }}
+        run: |
+          git checkout ${{ inputs.source_branch }}
+
+      - name: Merge ${{ inputs.destination_branch }} into ${{ inputs.source_branch }}
+        run: |
+          git merge --no-ff ${{ inputs.destination_branch }}
+
+      - name: Bump automatically ${{ inputs.source_branch }} branch version
+        if: ${{ inputs.source_version == '' }}
+        run: |
+          mvn -B release:update-versions -DgenerateBackupPoms=false -DautoVersionSubmodules=true --file pom.xml
+
+      - name: Bump manually ${{ inputs.source_branch }} branch version
+        if: ${{ inputs.source_version != '' }}
+        run: |
+          mvn -B versions:set -Pci -DgenerateBackupPoms=false -DnewVersion=${{ inputs.source_version }} --file pom.xml
+
+      - name: Retrieve ${{ inputs.source_branch }} branch version
+        id: get_source_version
+        run: |
+          echo "source_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout  --file pom.xml)" >> $GITHUB_OUTPUT
+
+      - name: Update README.md on ${{ inputs.source_branch }} branch
+        run: |
+          sed -i "s/> version.*/> version: ${{ steps.get_source_version.outputs.source_version }}/g" README.md
+
+      - name: Commit on ${{ inputs.source_branch }} branch
+        run: |
+          git add .
+          git commit -m "Updating to version '${{ steps.get_source_version.outputs.source_version }}'"
+
+      - name: Push on ${{ inputs.source_branch }} branch
+        if: ${{ ! inputs.dry_run }}
+        run: |
+          git push --tags --follow-tags origin ${{ inputs.source_branch }}
+      ## ------------------
