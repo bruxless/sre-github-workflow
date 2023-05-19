@@ -423,6 +423,7 @@ jobs:
       - name: Add bruxless helm repo
         if:
           contains('refs/heads/main', github.ref) ||
+          contains('refs/heads/develop', github.ref) ||
           contains('refs/heads/release', github.ref)
         run: |
           helm repo add bruxless ${{ inputs.chart_museum_url }}
