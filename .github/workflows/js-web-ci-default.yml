@@ -150,8 +150,8 @@ jobs:
         run: npm install
       - name: NodeJS compile
         run: npm run build
-      #      - name: NodeJS test
-      #        run: npm run test
+      - name: NodeJS test
+        run: npm run test
 
       - name: NodeJS lint
         run: npm run lint
@@ -160,7 +160,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: npm
-          path: ${{github.workspace}}/npm.sarif
+          path: ${{github.workspace}}/eslint_npm.sarif
 
       # Sonar analysis
       - name: SonarCloud scan
@@ -173,6 +173,7 @@ jobs:
             -Dsonar.organization=${{ inputs.sonar_organization }}
             -Dsonar.host.url=${{ inputs.sonar_host_url }}
             -Dsonar.projectKey=${{ inputs.sonar_project_key }}
+            -Dsonar.javascript.lcov.reportPaths=target/tests/coverage/lcov.info
       - name: SonarCloud Quality Gate check
         id: sonarcloud-quality-gate-check
         if:
@@ -222,17 +223,19 @@ jobs:
         run: |
           mkdir -p target/docker/
           cp -r docker/* target/docker/
-          grep -rl "@project.name@" target/docker | xargs sed -i "s/@project.name@/${{ steps.get_version.outputs.project_name }}/"
-          grep -rl "@project.version@" target/docker | xargs sed -i "s/@project.version@/${{ steps.get_version.outputs.project_version }}/"
-          grep -rl "@project.description@" target/docker | xargs sed -i "s/@project.description@/${{ steps.get_version.outputs.project_description }}/"
+          grep -rlZ "@project.artifactId@" target/docker | xargs -0 -r sed -i "s/@project.artifactId@/${{ steps.get_version.outputs.project_name }}/"
+          grep -rlZ "@project.name@" target/docker | xargs -0 -r sed -i "s/@project.name@/${{ steps.get_version.outputs.project_name }}/"
+          grep -rlZ "@project.version@" target/docker | xargs -0 -r sed -i "s/@project.version@/${{ steps.get_version.outputs.project_version }}/"
+          grep -rlZ "@project.description@" target/docker | xargs -0 -r sed -i "s/@project.description@/${{ steps.get_version.outputs.project_description }}/"
 
       - name: Helm Prepare
         run: |
-          mkdir -p target/helm/${{ inputs.project_name }}
-          cp -r helm/* target/helm/${{ inputs.project_name }}
-          grep -rl "@project.name@" target/helm/${{ inputs.project_name }} | xargs sed -i "s/@project.name@/$${{ steps.get_version.outputs.project_name }}/"
-          grep -rl "@project.version@" target/helm/${{ inputs.project_name }} | xargs sed -i "s/@project.version@/${{ steps.get_version.outputs.project_version }}/"
-          grep -rl "@project.description@" target/helm/${{ inputs.project_name }} | xargs sed -i "s/@project.description@/${{ steps.get_version.outputs.project_description }}/"
+          mkdir -p target/helm/webconsole
+          cp -r helm/* target/helm/webconsole
+          grep -rlZ "@project.artifactId@" target/helm/webconsole | xargs -0 -r sed -i "s/@project.artifactId@/$${{ steps.get_version.outputs.project_name }}/"
+          grep -rlZ "@project.name@" target/helm/webconsole | xargs -0 -r sed -i "s/@project.name@/$${{ steps.get_version.outputs.project_name }}/"
+          grep -rlZ "@project.version@" target/helm/webconsole | xargs -0 -r sed -i "s/@project.version@/${{ steps.get_version.outputs.project_version }}/"
+          grep -rlZ "@project.description@" target/helm/webconsole | xargs -0 -r sed -i "s/@project.description@/${{ steps.get_version.outputs.project_description }}/"
 
       # Lint distribution files (docker and helm)
       - name: Docker lint service
@@ -523,7 +526,7 @@ jobs:
           body_path: part_changelog.md
           tag_name: ${{ steps.get_version.outputs.project_version }}
           files: |
-            npm.sarif
+            eslint_npm.sarif
             trivy_npm.sarif
             trivy_docker_service.sarif
             trivy_docker_metrics.sarif
