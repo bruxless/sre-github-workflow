@@ -151,7 +151,7 @@ jobs:
       - name: NodeJS compile
         run: npm run build
       - name: NodeJS test
-        run: npm run test
+        run: npm run test:coverage
 
       - name: NodeJS lint
         run: npm run lint
