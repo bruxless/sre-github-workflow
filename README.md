@@ -15,7 +15,11 @@
     * [Java Micro-Service Release](#java-micro-service-release)
       * [Parameters](#parameters-2)
       * [Example](#example-2)
+    * [Javascript web Micro-Service CI](#javascript-web-micro-service-ci)
+      * [Parameters](#parameters-3)
+      * [Example](#example-3)
 <!-- TOC -->
+
 ## Usage
 
 ### Link PR to Asana Ticket
