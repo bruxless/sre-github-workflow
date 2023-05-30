@@ -15,7 +15,11 @@
     * [Java Micro-Service Release](#java-micro-service-release)
       * [Parameters](#parameters-2)
       * [Example](#example-2)
+    * [Javascript web Micro-Service CI](#javascript-web-micro-service-ci)
+      * [Parameters](#parameters-3)
+      * [Example](#example-3)
 <!-- TOC -->
+
 ## Usage
 
 ### Link PR to Asana Ticket
@@ -170,4 +174,64 @@ jobs:
       github_app_id: "github_app_id"
     secrets:
       BRUXLESS_GH_APP_KEY: ${{ secrets.BRUXLESS_GH_APP_KEY }}
+```
+
+
+### Javascript web Micro-Service CI
+
+[Source](.github/workflows/js-web-ci-default.yml)
+
+#### Parameters
+
+| Parameter Name              | Type   | Required | Description                                                                                 |
+|-----------------------------|--------|----------|---------------------------------------------------------------------------------------------|
+| node_version                | String | false    | The Node version (default to 16)                                                            |
+| helm_version                | String | false    | The helm version (default to 3.12.0)                                                        |
+| slack_channel_id_ci         | String | true     | The CI Slack channel's id                                                                   |
+| slack_channel_id_ci_release | String | true     | The CI release Slack channel's id                                                           |
+| sonar_organization          | String | true     | The sonar organization                                                                      |
+| sonar_host_url              | String | true     | The sonar host url                                                                          |
+| sonar_project_key           | String | true     | The sonar project key                                                                       |
+| project_name                | String | true     | The project name                                                                            |
+| aws_region                  | String | true     | The AWS region (default to eu-west-1)                                                       |
+| ecr_url                     | String | true     | The ECR url                                                                                 |
+| chart_museum_url            | String | true     | The ChartMuseum URL                                                                         |
+| enable_trivy_exit           | String | false    | Enable Trivy failure when CVE are found, you can deactivate this behavior (default to true) |
+| SLACK_BOT_TOKEN             | Secret | true     | The slack bot token                                                                         |
+| SONAR_TOKEN                 | Secret | true     | The sonar token                                                                             |
+| AWS_ACCESS_KEY_ID           | Secret | true     | The AWS access key                                                                          |
+| AWS_SECRET_ACCESS_KEY       | Secret | true     | The AWS secret access key                                                                   |
+
+#### Example
+
+```yaml
+name: Build
+run-name: Build ${{ github.repository }} for branch ${{ github.ref_name }}
+
+on:
+  push:
+    branches:
+      - "**"
+
+permissions:
+  # In order to give release creation right.
+  contents: write
+
+jobs:
+  build:
+    uses: bruxless/github_workflow/.github/workflows/js-web-ci-default.yml@main
+    with:
+      slack_channel_id_ci: "slack_channel_id_ci"
+      slack_channel_id_ci_release: "slack_channel_id_ci"
+      sonar_organization: "sonar_organization"
+      sonar_host_url: "sonar_host_url"
+      sonar_project_key: "sonar_project_key"
+      project_name: "project_name"
+      ecr_url: "ecr_url"
+      chart_museum_url: "chart_museum_url"
+    secrets:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 ```

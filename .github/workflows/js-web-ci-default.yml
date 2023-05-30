@@ -1,0 +1,623 @@
+name: CI for JS (NPN) microservice
+
+on:
+  workflow_call:
+    inputs:
+      node_version:
+        description: "The node version (default to 16)"
+        type: string
+        required: false
+        default: "16"
+      helm_version:
+        description: "The helm version (default to 3.12.0)"
+        type: string
+        required: false
+        default: "3.12.0"
+      slack_channel_id_ci:
+        description: "The CI Slack channel's id"
+        type: string
+        required: true
+      slack_channel_id_ci_release:
+        description: "The CI release Slack channel's id"
+        type: string
+        required: true
+      sonar_organization:
+        description: "The sonar organization"
+        type: string
+        required: true
+      sonar_host_url:
+        description: "The sonar host url"
+        type: string
+        required: true
+      sonar_project_key:
+        description: "The sonar project key"
+        type: string
+        required: true
+      project_name:
+        description: "The project name"
+        type: string
+        required: true
+      aws_region:
+        description: "The AWS region"
+        type: string
+        required: false
+        default: "eu-west-1"
+      ecr_url:
+        description: "The ECR url"
+        type: string
+        required: true
+      chart_museum_url:
+        description: "The ChartMuseum URL"
+        type: string
+        required: true
+      enable_trivy_exit:
+        description: "Enable Trivy failure when CVE are found, you can deactivate this behavior"
+        type: boolean
+        required: false
+        default: true
+    secrets:
+      SLACK_BOT_TOKEN:
+        description: "The slack bot token"
+        required: true
+      SONAR_TOKEN:
+        description: "The sonar token"
+        required: true
+      AWS_ACCESS_KEY_ID:
+        description: "The AWS access key"
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        description: "The AWS secret access key"
+        required: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-22.04
+    steps:
+
+      # Checkout project
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      # Setup and uses
+      - name: Set up node ${{ inputs.node_version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ inputs.node_version }}
+          cache: npm
+      - name: Set up helm ${{ inputs.helm_version }}
+        uses: azure/setup-helm@v3
+        with:
+          version: ${{ inputs.helm_version }}
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      # Slack message
+      - name: Slack - ci - started
+        id: slack
+        uses: slackapi/slack-github-action@v1.23.0
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN}}
+        with:
+          channel-id: ${{ inputs.slack_channel_id_ci }}
+          payload: |
+            {
+              "attachments": [
+                {
+                  "color": "62a0ea",
+                  "title": "Build ${{ github.run_id }}-${{ github.run_number }} started",
+                  "title_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                  "fields": [
+                    {
+                      "value": ":the_horns:",
+                      "short": true
+                    },
+                    {
+                      "title": "Status",
+                      "value": "In Progress",
+                      "short": true
+                    },
+                    {
+                      "title": "Repository",
+                      "value": "<https://github.com/${{ github.repository }}|${{ github.repository }}>",
+                      "short": false
+                    },
+                    {
+                      "title": "Branch",
+                      "value": "<https://github.com/${{ github.repository }}/tree/${{ github.ref_name }}|${{ github.ref_name }}>",
+                      "short": false
+                    }
+                  ]
+                }
+              ]
+            }
+
+      # Project version and information
+      - name: Retrieve project version
+        id: get_version
+        run: |
+          echo "project_name=$(awk -F'"' '/"name": ".+"/{ print $4; exit; }' package.json)" >> $GITHUB_OUTPUT
+          echo "project_version=$(awk -F'"' '/"version": ".+"/{ print $4; exit; }' package.json)" >> $GITHUB_OUTPUT
+          echo "project_description=$(awk -F'"' '/"description": ".+"/{ print $4; exit; }' package.json)" >> $GITHUB_OUTPUT
+
+      # Npm compile and tests
+      - name: NodeJS install
+        run: npm install
+      - name: NodeJS compile
+        run: npm run build
+      - name: NodeJS test
+        run: npm run test:coverage
+
+      - name: NodeJS lint
+        run: npm run lint
+      - name: Lint upload result npm
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: npm
+          path: ${{github.workspace}}/eslint_npm.sarif
+
+      # Sonar analysis
+      - name: SonarCloud scan
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=${{ inputs.sonar_organization }}
+            -Dsonar.host.url=${{ inputs.sonar_host_url }}
+            -Dsonar.projectKey=${{ inputs.sonar_project_key }}
+            -Dsonar.javascript.lcov.reportPaths=target/tests/coverage/lcov.info
+      - name: SonarCloud Quality Gate check
+        id: sonarcloud-quality-gate-check
+        if:
+          contains('refs/heads/main', github.ref) ||
+          contains('refs/heads/release', github.ref) ||
+          contains('refs/heads/develop', github.ref)
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      # Dependencies checking
+      - name: Trivy scan npm
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          exit-code: '1'
+          ignore-unfixed: false
+          output: "trivy_npm.sarif"
+          format: 'sarif'
+          vuln-type: 'library'
+          severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
+          scanners: 'vuln'
+          timeout: '7m'
+
+      # Can be deleted when this issue is closed : https://github.com/aquasecurity/trivy-action/issues/228
+      - name: Check scan npm trivy results
+        if: inputs.enable_trivy_exit
+        run: |
+          if grep -qE 'HIGH|CRITICAL' trivy_npm.sarif; then
+            echo "Vulnerabilities found"
+            exit 1
+          else
+            echo "No significant vulnerabilities found"
+            exit 0
+          fi
+
+      - name: Trivy upload result npm
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: trivy-npm
+          path: ${{github.workspace}}/trivy_npm.sarif
+
+      # Prepare distribution files (docker and helm)
+      - name: Docker Prepare
+        run: |
+          mkdir -p target/docker/
+          cp -r docker/* target/docker/
+          grep -rlZ "@project.artifactId@" target/docker | xargs -0 -r sed -i "s/@project.artifactId@/${{ steps.get_version.outputs.project_name }}/"
+          grep -rlZ "@project.name@" target/docker | xargs -0 -r sed -i "s/@project.name@/${{ steps.get_version.outputs.project_name }}/"
+          grep -rlZ "@project.version@" target/docker | xargs -0 -r sed -i "s/@project.version@/${{ steps.get_version.outputs.project_version }}/"
+          grep -rlZ "@project.description@" target/docker | xargs -0 -r sed -i "s/@project.description@/${{ steps.get_version.outputs.project_description }}/"
+
+      - name: Helm Prepare
+        run: |
+          mkdir -p target/helm/${{ inputs.project_name }}
+          cp -r helm/* target/helm/${{ inputs.project_name }}
+          grep -rlZ "@project.artifactId@" target/helm/${{ inputs.project_name }} | xargs -0 -r sed -i "s/@project.artifactId@/$${{ steps.get_version.outputs.project_name }}/"
+          grep -rlZ "@project.name@" target/helm/${{ inputs.project_name }} | xargs -0 -r sed -i "s/@project.name@/$${{ steps.get_version.outputs.project_name }}/"
+          grep -rlZ "@project.version@" target/helm/${{ inputs.project_name }} | xargs -0 -r sed -i "s/@project.version@/${{ steps.get_version.outputs.project_version }}/"
+          grep -rlZ "@project.description@" target/helm/${{ inputs.project_name }} | xargs -0 -r sed -i "s/@project.description@/${{ steps.get_version.outputs.project_description }}/"
+
+      # Lint distribution files (docker and helm)
+      - name: Docker lint service
+        uses: hadolint/hadolint-action@v3.0.0
+        with:
+          dockerfile: target/docker/service.Dockerfile
+          failure-threshold: warn
+          output-file: hadolint-service.sarif
+          format: sarif
+      - name: Docker lint metrics
+        uses: hadolint/hadolint-action@v3.0.0
+        with:
+          dockerfile: target/docker/metrics.Dockerfile
+          failure-threshold: warn
+          output-file: hadolint-metrics.sarif
+          format: sarif
+      - name: Helm lint
+        run: helm lint target/helm/${{ inputs.project_name }}
+
+      - name: Upload Hadolint service result
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: hadolint-service
+          path: ${{github.workspace}}/hadolint-service.sarif
+      - name: Upload Hadolint metrics result
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: hadolint-metrics
+          path: ${{github.workspace}}/hadolint-metrics.sarif
+
+      # Build distribution files (docker and helm)
+      - name: Docker build service
+        run: docker build -f target/docker/service.Dockerfile . -t bruxless/${{ inputs.project_name }}-service:${{ steps.get_version.outputs.project_version }}
+      - name: Docker build metrics
+        run: docker build -f target/docker/metrics.Dockerfile . -t bruxless/${{ inputs.project_name }}-metrics:${{ steps.get_version.outputs.project_version }}
+      - name: Helm Package
+        run: helm package target/helm/${{ inputs.project_name }} -d target/helm/
+
+      # Dependencies checking
+      - name: Trivy scan result docker service
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'bruxless/${{ inputs.project_name }}-service:${{ steps.get_version.outputs.project_version }}'
+          exit-code: '1'
+          ignore-unfixed: true
+          output: "trivy_docker_service.sarif"
+          format: 'sarif'
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+          scanners: 'vuln'
+          timeout: '7m'
+      # Can be deleted when this issue is closed : https://github.com/aquasecurity/trivy-action/issues/228
+      - name: Check docker service trivy results
+        if: inputs.enable_trivy_exit
+        run: |
+          if grep -qE 'HIGH|CRITICAL' trivy_docker_service.sarif; then
+            echo "Vulnerabilities found"
+            exit 1
+          else
+            echo "No significant vulnerabilities found"
+            exit 0
+          fi
+
+      - name: Trivy upload result docker service
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: trivy-docker-service
+          path: ${{github.workspace}}/trivy_docker_service.sarif
+      - name: Trivy scan result docker metrics
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'bruxless/${{ inputs.project_name }}-metrics:${{ steps.get_version.outputs.project_version }}'
+          exit-code: '1'
+          ignore-unfixed: true
+          output: "trivy_docker_metrics.sarif"
+          format: 'sarif'
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+          scanners: 'vuln'
+          timeout: '7m'
+
+      # Can be deleted when this issue is closed : https://github.com/aquasecurity/trivy-action/issues/228
+      - name: Check docker metrics trivy results
+        if: inputs.enable_trivy_exit
+        run: |
+          if grep -qE 'HIGH|CRITICAL' trivy_docker_metrics.sarif; then
+            echo "Vulnerabilities found"
+            exit 1
+          else
+            echo "No significant vulnerabilities found"
+            exit 0
+          fi
+
+      - name: Trivy upload result docker metrics
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: trivy-docker-metrics
+          path: ${{github.workspace}}/trivy_docker_metrics.sarif
+
+      # Tag docker if master ou release branches
+      - name: Tag docker images
+        if:
+          contains('refs/heads/main', github.ref) ||
+          contains('refs/heads/release', github.ref)
+        run: |
+          docker tag bruxless/${{ inputs.project_name }}-service:${{ steps.get_version.outputs.project_version }} ${{ inputs.ecr_url }}/${{ inputs.project_name }}-service:${{ steps.get_version.outputs.project_version }}
+          docker tag bruxless/${{ inputs.project_name }}-metrics:${{ steps.get_version.outputs.project_version }} ${{ inputs.ecr_url }}/${{ inputs.project_name }}-metrics:${{ steps.get_version.outputs.project_version }}
+
+      # Tag docker if develop branche
+      - name: Tag snapshot docker images
+        if:
+          contains('refs/heads/develop', github.ref)
+        run: |
+          docker tag bruxless/${{ inputs.project_name }}-service:${{ steps.get_version.outputs.project_version }} ${{ inputs.ecr_url }}/${{ inputs.project_name }}-service-snapshot:${{ steps.get_version.outputs.project_version }}
+          docker tag bruxless/${{ inputs.project_name }}-metrics:${{ steps.get_version.outputs.project_version }} ${{ inputs.ecr_url }}/${{ inputs.project_name }}-metrics-snapshot:${{ steps.get_version.outputs.project_version }}
+
+      # Aws login if master or release branches
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2.0.0
+        if:
+          contains('refs/heads/main', github.ref) ||
+          contains('refs/heads/develop', github.ref) ||
+          contains('refs/heads/release', github.ref)
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ inputs.aws_region }}
+
+      # Push docker on ECR if master or release branches
+      - name: Push images on ECR
+        if:
+          contains('refs/heads/main', github.ref) ||
+          contains('refs/heads/release', github.ref)
+        run: |
+          aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin '${{ inputs.ecr_url }}/${{ inputs.project_name }}-service'
+          docker push ${{ inputs.ecr_url }}/${{ inputs.project_name }}-service:${{ steps.get_version.outputs.project_version }}
+          aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin '${{ inputs.ecr_url }}/${{ inputs.project_name }}-metrics'
+          docker push ${{ inputs.ecr_url }}/${{ inputs.project_name }}-metrics:${{ steps.get_version.outputs.project_version }}
+
+      # Push docker on ECR if develop branche
+      - name: Push snapshot images on ECR
+        if:
+          contains('refs/heads/develop', github.ref)
+        run: |
+          aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin '${{ inputs.ecr_url }}/${{ inputs.project_name }}-service-snapshot'
+          docker push ${{ inputs.ecr_url }}/${{ inputs.project_name }}-service-snapshot:${{ steps.get_version.outputs.project_version }}
+          aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin '${{ inputs.ecr_url }}/${{ inputs.project_name }}-metrics-snapshot'
+          docker push ${{ inputs.ecr_url }}/${{ inputs.project_name }}-metrics-snapshot:${{ steps.get_version.outputs.project_version }}
+
+      # Helm configure if master or release branches
+      - name: Configure Helm s3 plugin
+        if:
+          contains('refs/heads/main', github.ref) ||
+          contains('refs/heads/develop', github.ref) ||
+          contains('refs/heads/release', github.ref)
+        run: |
+          helm plugin install https://github.com/hypnoglow/helm-s3.git
+
+      - name: Add bruxless helm repo
+        if:
+          contains('refs/heads/main', github.ref) ||
+          contains('refs/heads/develop', github.ref) ||
+          contains('refs/heads/release', github.ref)
+        run: |
+          helm repo add bruxless ${{ inputs.chart_museum_url }}
+
+      # Push Helm chart on S3 if master or release branches
+      - name: Push charts on S3
+        if:
+          contains('refs/heads/main', github.ref) ||
+          contains('refs/heads/release', github.ref)
+        run: |
+          helm s3 push target/helm/${{ inputs.project_name }}-${{ steps.get_version.outputs.project_version }}.tgz bruxless
+
+      # Push Helm chart on S3 if develop branche (allow helm push overwrite)
+      - name: Push snapshot charts on S3
+        if:
+          contains('refs/heads/main', github.ref) ||
+          contains('refs/heads/release', github.ref)
+        run: |
+          helm s3 push --force target/helm/${{ inputs.project_name }}-${{ steps.get_version.outputs.project_version }}.tgz bruxless
+
+      # Slack message if succeed
+      - name: Slack - ci - succeed
+        if: success()
+        uses: slackapi/slack-github-action@v1.23.0
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN}}
+        with:
+          channel-id: ${{ inputs.slack_channel_id_ci }}
+          update-ts: ${{ steps.slack.outputs.ts }}
+          payload: |
+            {
+              "attachments": [
+                {
+                  "color": "57e389",
+                  "title": "Build ${{ github.run_id }}-${{ github.run_number }} succeed",
+                  "title_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                  "fields": [
+                    {
+                      "value": ":clap:",
+                      "short": true
+                    },
+                    {
+                      "title": "Status",
+                      "value": "Succeed",
+                      "short": true
+                    },
+                    {
+                      "title": "Repository",
+                      "value": "<https://github.com/${{ github.repository }}|${{ github.repository }}>",
+                      "short": false
+                    },
+                    {
+                      "title": "Branch",
+                      "value": "<https://github.com/${{ github.repository }}/tree/${{ github.ref_name }}|${{ github.ref_name }}>",
+                      "short": false
+                    }
+                  ]
+                }
+              ]
+            }
+
+      # Slack message if failed
+      - name: Slack - ci - failed
+        if: failure()
+        uses: slackapi/slack-github-action@v1.23.0
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN}}
+        with:
+          channel-id: ${{ inputs.slack_channel_id_ci }}
+          update-ts: ${{ steps.slack.outputs.ts }}
+          payload: |
+            {
+              "attachments": [
+                {
+                  "color": "ed333b",
+                  "title": "Build ${{ github.run_id }}-${{ github.run_number }} failed",
+                  "title_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                  "fields": [
+                    {
+                      "value": ":-1:",
+                      "short": true
+                    },
+                    {
+                      "title": "Status",
+                      "value": "Failed",
+                      "short": true
+                    },
+                    {
+                      "title": "Repository",
+                      "value": "<https://github.com/${{ github.repository }}|${{ github.repository }}>",
+                      "short": false
+                    },
+                    {
+                      "title": "Branch",
+                      "value": "<https://github.com/${{ github.repository }}/tree/${{ github.ref_name }}|${{ github.ref_name }}>",
+                      "short": false
+                    }
+                  ]
+                }
+              ]
+            }
+
+      ## Create release
+      - name: Extract changelog part for release
+        if:
+          success() &&
+          (
+          contains('refs/heads/main', github.ref) ||
+          contains('refs/heads/release', github.ref)
+          )
+        run: |
+          sed -n "/\[${{ steps.get_version.outputs.project_version }}\]/,/## \[/p" CHANGELOG.md | sed -e '1d' -e '$d' > part_changelog.md
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v0.1.15
+        if:
+          success() &&
+          (
+          contains('refs/heads/main', github.ref) ||
+          contains('refs/heads/release', github.ref)
+          )
+        with:
+          body_path: part_changelog.md
+          tag_name: ${{ steps.get_version.outputs.project_version }}
+          files: |
+            eslint_npm.sarif
+            trivy_npm.sarif
+            trivy_docker_service.sarif
+            trivy_docker_metrics.sarif
+            hadolint-service.sarif
+            hadolint-metrics.sarif
+
+      # Slack message for release
+      - name: Slack - ci_release - succeed
+        if:
+          success() &&
+          (
+          contains('refs/heads/main', github.ref) ||
+          contains('refs/heads/release', github.ref)
+          )
+        uses: slackapi/slack-github-action@v1.23.0
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN}}
+        with:
+          channel-id: ${{ inputs.slack_channel_id_ci_release }}
+          payload: |
+            {
+              "attachments": [
+                {
+                  "color": "57e389",
+                  "title": "Release ${{ steps.get_version.outputs.project_version }} available",
+                  "title_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                  "fields": [
+                    {
+                      "value": ":clap:",
+                      "short": true
+                    },
+                    {
+                      "title": "Status",
+                      "value": "Succeed",
+                      "short": true
+                    },
+                    {
+                      "title": "Repository",
+                      "value": "<https://github.com/${{ github.repository }}|${{ github.repository }}>",
+                      "short": false
+                    },
+                    {
+                      "title": "Branch",
+                      "value": "<https://github.com/${{ github.repository }}/tree/${{ github.ref_name }}|${{ github.ref_name }}>",
+                      "short": false
+                    }
+                  ]
+                }
+              ]
+            }
+
+      - name: Slack - ci_release - failed
+        if:
+          failure() &&
+          (
+          contains('refs/heads/main', github.ref) ||
+          contains('refs/heads/release', github.ref)
+          )
+        uses: slackapi/slack-github-action@v1.23.0
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN}}
+        with:
+          channel-id: ${{ inputs.slack_channel_id_ci_release }}
+          payload: |
+            {
+              "attachments": [
+                {
+                  "color": "ed333b",
+                  "title": "Release ${{ steps.get_version.outputs.project_version }} failed",
+                  "title_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                  "fields": [
+                    {
+                      "value": ":-1:",
+                      "short": true
+                    },
+                    {
+                      "title": "Status",
+                      "value": "Failed",
+                      "short": true
+                    },
+                    {
+                      "title": "Repository",
+                      "value": "<https://github.com/${{ github.repository }}|${{ github.repository }}>",
+                      "short": false
+                    },
+                    {
+                      "title": "Branch",
+                      "value": "<https://github.com/${{ github.repository }}/tree/${{ github.ref_name }}|${{ github.ref_name }}>",
+                      "short": false
+                    }
+                  ]
+                }
+              ]
+            }
