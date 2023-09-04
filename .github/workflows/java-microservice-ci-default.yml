@@ -166,7 +166,7 @@ jobs:
           contains('refs/heads/develop', github.ref)
         run: |
           initial_project_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout  --file pom.xml)
-          mvn -B versions:set -Pci -DgenerateBackupPoms=false -DnewVersion=$initial_project_version+${{ github.run_id }}-${{ github.run_number }}
+          mvn -B versions:set -Pci -DgenerateBackupPoms=false -DnewVersion=$initial_project_version-${{ github.run_id }}-${{ github.run_number }}
 
       # Project version and information
       - name: Retrieve project version
