@@ -428,20 +428,20 @@ jobs:
           aws ecr get-login-password --region ${{ inputs.aws_region }} | docker login --username AWS --password-stdin '${{ inputs.ecr_url }}/${{ inputs.project_name }}-service'
           docker push ${{ inputs.ecr_url }}/${{ inputs.project_name }}-service:${{ steps.get_version.outputs.project_version }}
 
-      # Push docker on ECR if develop branch
-      - name: Push db image on ECR for snapshot
-        if: |
-          contains('refs/heads/develop', github.ref) && inputs.enable_database_docker
-        run: |
-          aws ecr get-login-password --region ${{ inputs.aws_region }} | docker login --username AWS --password-stdin '${{ inputs.ecr_url }}/${{ inputs.project_name }}-db-snapshot'
-          docker push ${{ inputs.ecr_url }}/${{ inputs.project_name }}-db-snapshot:${{ steps.get_version.outputs.project_version }}
-
-      - name: Push service image on ECR for snapshot
-        if: |
-          contains('refs/heads/develop', github.ref)
-        run: |
-          aws ecr get-login-password --region ${{ inputs.aws_region }} | docker login --username AWS --password-stdin '${{ inputs.ecr_url }}/${{ inputs.project_name }}-service-snapshot'
-          docker push ${{ inputs.ecr_url }}/${{ inputs.project_name }}-service-snapshot:${{ steps.get_version.outputs.project_version }}
+#      # Push docker on ECR if develop branch
+#      - name: Push db image on ECR for snapshot
+#        if: |
+#          contains('refs/heads/develop', github.ref) && inputs.enable_database_docker
+#        run: |
+#          aws ecr get-login-password --region ${{ inputs.aws_region }} | docker login --username AWS --password-stdin '${{ inputs.ecr_url }}/${{ inputs.project_name }}-db-snapshot'
+#          docker push ${{ inputs.ecr_url }}/${{ inputs.project_name }}-db-snapshot:${{ steps.get_version.outputs.project_version }}
+#
+#      - name: Push service image on ECR for snapshot
+#        if: |
+#          contains('refs/heads/develop', github.ref)
+#        run: |
+#          aws ecr get-login-password --region ${{ inputs.aws_region }} | docker login --username AWS --password-stdin '${{ inputs.ecr_url }}/${{ inputs.project_name }}-service-snapshot'
+#          docker push ${{ inputs.ecr_url }}/${{ inputs.project_name }}-service-snapshot:${{ steps.get_version.outputs.project_version }}
 
       - name: Helm registry login
         if: |
