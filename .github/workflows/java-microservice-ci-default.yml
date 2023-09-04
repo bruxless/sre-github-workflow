@@ -449,7 +449,7 @@ jobs:
           contains('refs/heads/develop', github.ref) ||
           contains('refs/heads/release', github.ref)
         run: |
-          aws ecr get-login-password | helm registry login --username AWS --password-stdin ${{ inputs.ecr_url }}
+          aws ecr get-login-password --region ${{ inputs.aws_region }} | helm registry login --username AWS --password-stdin ${{ inputs.ecr_url }}
 
       # Push Helm chart on OCI if master, release or develop branches
       - name: Push charts on OCI
