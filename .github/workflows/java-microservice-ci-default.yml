@@ -160,6 +160,14 @@ jobs:
               ]
             }
 
+      # Override project version for development
+      - name: Override project version
+        if: |
+          contains('refs/heads/develop', github.ref)
+        run: |
+          initial_project_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout  --file pom.xml)
+          mvn -B versions:set -Pci -DgenerateBackupPoms=false -DnewVersion=$initial_project_version+${{ github.run_id }}-${{ github.run_number }}
+
       # Project version and information
       - name: Retrieve project version
         id: get_version
@@ -197,7 +205,7 @@ jobs:
 
       # Dependencies checking
       - name: Trivy scan maven
-        uses: aquasecurity/trivy-action@0.10.0
+        uses: aquasecurity/trivy-action@0.12.0
         with:
           scan-type: 'fs'
           exit-code: '1'
@@ -310,7 +318,7 @@ jobs:
 
       # Dependencies checking
       - name: Trivy scan docker db
-        uses: aquasecurity/trivy-action@0.10.0
+        uses: aquasecurity/trivy-action@0.12.0
         if: ${{ inputs.enable_database_docker }}
         with:
           image-ref: 'bruxless/${{ inputs.project_name }}-db:${{ steps.get_version.outputs.project_version }}'
@@ -341,7 +349,7 @@ jobs:
           path: ${{github.workspace}}/trivy_docker_db.sarif
 
       - name: Trivy scan docker service
-        uses: aquasecurity/trivy-action@0.10.0
+        uses: aquasecurity/trivy-action@0.12.0
         with:
           image-ref: 'bruxless/${{ inputs.project_name }}-service:${{ steps.get_version.outputs.project_version }}'
           exit-code: '1'
@@ -374,7 +382,8 @@ jobs:
       - name: Tag docker db image
         if: |
           ( contains('refs/heads/main', github.ref) ||
-          contains('refs/heads/release', github.ref) ) 
+          contains('refs/heads/release', github.ref) ||
+          contains('refs/heads/develop', github.ref)) 
           && inputs.enable_database_docker
         run: |
           docker tag bruxless/${{ inputs.project_name }}-db:${{ steps.get_version.outputs.project_version }} ${{ inputs.ecr_url }}/${{ inputs.project_name }}-db:${{ steps.get_version.outputs.project_version }}
@@ -382,22 +391,10 @@ jobs:
       - name: Tag docker service image
         if: |
           contains('refs/heads/main', github.ref) ||
-          contains('refs/heads/release', github.ref)
-        run: |
-          docker tag bruxless/${{ inputs.project_name }}-service:${{ steps.get_version.outputs.project_version }} ${{ inputs.ecr_url }}/${{ inputs.project_name }}-service:${{ steps.get_version.outputs.project_version }}
-
-      # Tag docker if develop branche
-      - name: Tag db snapshot docker image
-        if: |
-          contains('refs/heads/develop', github.ref) && inputs.enable_database_docker
-        run: |
-          docker tag bruxless/${{ inputs.project_name }}-db:${{ steps.get_version.outputs.project_version }} ${{ inputs.ecr_url }}/${{ inputs.project_name }}-db-snapshot:${{ steps.get_version.outputs.project_version }}
-
-      - name: Tag service snapshot docker image
-        if:
+          contains('refs/heads/release', github.ref) ||
           contains('refs/heads/develop', github.ref)
         run: |
-          docker tag bruxless/${{ inputs.project_name }}-service:${{ steps.get_version.outputs.project_version }} ${{ inputs.ecr_url }}/${{ inputs.project_name }}-service-snapshot:${{ steps.get_version.outputs.project_version }}
+          docker tag bruxless/${{ inputs.project_name }}-service:${{ steps.get_version.outputs.project_version }} ${{ inputs.ecr_url }}/${{ inputs.project_name }}-service:${{ steps.get_version.outputs.project_version }}
 
       # Aws login if master, develop or release branches
       - name: Configure AWS Credentials
@@ -415,7 +412,8 @@ jobs:
       - name: Push db image on ECR
         if: |
           ( contains('refs/heads/main', github.ref) ||
-          contains('refs/heads/release', github.ref) ) 
+          contains('refs/heads/release', github.ref) ||
+          contains('refs/heads/develop', github.ref) ) 
           && inputs.enable_database_docker
         run: |
           aws ecr get-login-password --region ${{ inputs.aws_region }} | docker login --username AWS --password-stdin '${{ inputs.ecr_url }}/${{ inputs.project_name }}-db'
@@ -424,7 +422,8 @@ jobs:
       - name: Push service image on ECR
         if: |
           contains('refs/heads/main', github.ref) ||
-          contains('refs/heads/release', github.ref)
+          contains('refs/heads/release', github.ref) ||
+          contains('refs/heads/develop', github.ref)
         run: |
           aws ecr get-login-password --region ${{ inputs.aws_region }} | docker login --username AWS --password-stdin '${{ inputs.ecr_url }}/${{ inputs.project_name }}-service'
           docker push ${{ inputs.ecr_url }}/${{ inputs.project_name }}-service:${{ steps.get_version.outputs.project_version }}
@@ -444,37 +443,22 @@ jobs:
           aws ecr get-login-password --region ${{ inputs.aws_region }} | docker login --username AWS --password-stdin '${{ inputs.ecr_url }}/${{ inputs.project_name }}-service-snapshot'
           docker push ${{ inputs.ecr_url }}/${{ inputs.project_name }}-service-snapshot:${{ steps.get_version.outputs.project_version }}
 
-      # Helm configure if master, develop or release branches
-      - name: Configure Helm s3 plugin
+      - name: Helm registry login
         if: |
           contains('refs/heads/main', github.ref) ||
           contains('refs/heads/develop', github.ref) ||
           contains('refs/heads/release', github.ref)
         run: |
-          helm plugin install https://github.com/hypnoglow/helm-s3.git
+          aws ecr get-login-password | helm registry login --username AWS --password-stdin ${{ inputs.chart_museum_url }}
 
-      - name: Add bruxless helm repo
+      # Push Helm chart on OCI if master, release or develop branches
+      - name: Push charts on OCI
         if: |
           contains('refs/heads/main', github.ref) ||
-          contains('refs/heads/develop', github.ref) ||
-          contains('refs/heads/release', github.ref)
-        run: |
-          helm repo add bruxless ${{ inputs.chart_museum_url }}
-      
-      # Push Helm chart on S3 if master or release branches
-      - name: Push charts on S3
-        if: |
-          contains('refs/heads/main', github.ref) ||
-          contains('refs/heads/release', github.ref)
-        run: |
-          helm s3 push ${{ inputs.project_name }}-service/target/helm/${{ inputs.project_name }}-${{ steps.get_version.outputs.project_version }}.tgz bruxless
-
-      # Push Helm chart on S3 if develop branche (allow helm push overwrite)
-      - name: Push charts on S3 for snapshot
-        if: |
+          contains('refs/heads/release', github.ref) ||
           contains('refs/heads/develop', github.ref)
         run: |
-          helm s3 push --force ${{ inputs.project_name }}-service/target/helm/${{ inputs.project_name }}-${{ steps.get_version.outputs.project_version }}.tgz bruxless
+          helm push ${{ inputs.project_name }}-service/target/helm/${{ inputs.project_name }}-${{ steps.get_version.outputs.project_version }}.tgz oci://${{ inputs.chart_museum_url }}
 
       # Slack message if succeed
       - name: Slack - ci - succeed
