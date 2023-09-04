@@ -50,7 +50,7 @@ on:
       ecr_url:
         description: "The ECR url"
         type: string
-        required: true
+        required: false
       chart_museum_url:
         description: "The ChartMuseum URL"
         type: string
