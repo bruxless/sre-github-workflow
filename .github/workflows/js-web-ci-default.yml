@@ -49,7 +49,7 @@ on:
       chart_museum_url:
         description: "The ChartMuseum URL"
         type: string
-        required: true
+        required: false
       enable_trivy_exit:
         description: "Enable Trivy failure when CVE are found, you can deactivate this behavior"
         type: boolean
