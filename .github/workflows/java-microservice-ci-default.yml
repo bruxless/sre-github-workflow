@@ -55,7 +55,6 @@ on:
         description: "The ChartMuseum URL"
         type: string
         required: false
-        deprecationMessage: "Is no longer use, helm charts are pushed in ECR"
       enable_trivy_exit:
         description: "Enable Trivy failure when CVE are found, you can deactivate this behavior"
         type: boolean
