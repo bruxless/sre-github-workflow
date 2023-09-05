@@ -137,12 +137,20 @@ jobs:
               ]
             }
 
+      # Override project version for development
+      - name: Override project version
+        if: |
+          contains('refs/heads/develop', github.ref)
+        run: |
+          initial_project_version=project_version=$(awk -F'"' '/"version": ".+"/{ print $4; exit; }' package.json)-${{ github.run_id }}-${{ github.run_number }}
+          sed -i "s/\"version\": \".*\"/\"version\": \"$initial_project_version\"/g" package.json
+
       # Project version and information
       - name: Retrieve project version
         id: get_version
         run: |
           echo "project_name=$(awk -F'"' '/"name": ".+"/{ print $4; exit; }' package.json)" >> $GITHUB_OUTPUT
-          echo "project_version=$(awk -F'"' '/"version": ".+"/{ print $4; exit; }' package.json)-${{ github.run_id }}-${{ github.run_number }}" >> $GITHUB_OUTPUT
+          echo "project_version=$(awk -F'"' '/"version": ".+"/{ print $4; exit; }' package.json)" >> $GITHUB_OUTPUT
           echo "project_description=$(awk -F'"' '/"description": ".+"/{ print $4; exit; }' package.json)" >> $GITHUB_OUTPUT
 
       # Npm compile and tests
