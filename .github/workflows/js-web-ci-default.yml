@@ -142,7 +142,7 @@ jobs:
         if: |
           contains('refs/heads/develop', github.ref)
         run: |
-          initial_project_version=project_version=$(awk -F'"' '/"version": ".+"/{ print $4; exit; }' package.json)-${{ github.run_id }}-${{ github.run_number }}
+          initial_project_version=$(awk -F'"' '/"version": ".+"/{ print $4; exit; }' package.json)-${{ github.run_id }}-${{ github.run_number }}
           sed -i "s/\"version\": \".*\"/\"version\": \"$initial_project_version\"/g" package.json
 
       # Project version and information
