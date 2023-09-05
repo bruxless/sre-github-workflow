@@ -6,9 +6,6 @@
 * [Reusable Github workflow for Bruxless](#reusable-github-workflow-for-bruxless)
   * [Workflow available](#workflow-available)
   * [Usage](#usage)
-    * [Link PR to Asana Ticket](#link-pr-to-asana-ticket)
-      * [Parameters](#parameters)
-      * [Example](#example)
     * [Java Micro-Service CI](#java-micro-service-ci)
       * [Parameters](#parameters-1)
       * [Example](#example-1)
@@ -21,36 +18,6 @@
 <!-- TOC -->
 
 ## Usage
-
-### Link PR to Asana Ticket
-
-[Source](.github/workflows/link-pr-with-asana.yml)
-
-#### Parameters
-
-| Parameter Name | Type   | Required | Description                   |
-|----------------|--------|----------|-------------------------------|
-| `ASANA_SECRET` | secret | true     | The secret key given by Asana |
-
-#### Example
-
-```
-name: Link PR with Asana
-
-on:
-  pull_request:
-    types:
-    - opened
-    - reopened
-
-jobs:
-  asana_link_with_pr:
-    # Asana link is disabled when we do not found asana link in PR's body
-    if: contains(github.event.pull_request.body, 'https://app.asana.com')
-    uses: bruxless/sre-github-workflow/.github/workflows/link-pr-with-asana.yml@main
-    secrets:
-      ASANA_SECRET: ${{ secrets.ASANA_SECRET }}
-```
 
 ### Java Micro-Service CI
 
@@ -71,7 +38,7 @@ jobs:
 | project_name                | String | true     | The project name                                                                            |
 | aws_region                  | String | true     | The AWS region (default to eu-west-1)                                                       |
 | ecr_url                     | String | true     | The ECR url                                                                                 |
-| chart_museum_url            | String | true     | The ChartMuseum URL                                                                         |
+| chart_museum_url            | String | false    | The ChartMuseum URL (DEPRECATED)                                                            |
 | enable_trivy_exit           | String | false    | Enable Trivy failure when CVE are found, you can deactivate this behavior (default to true) |
 | enable_database_docker      | String | false    | Enable the database docker build (default to true)                                          |
 | SLACK_BOT_TOKEN             | Secret | true     | The slack bot token                                                                         |
@@ -105,7 +72,6 @@ jobs:
       sonar_project_key: "sonar_project_key"
       project_name: "project_name"
       ecr_url: "ecr_url"
-      chart_museum_url: "chart_museum_url"
     secrets:
       SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -195,7 +161,7 @@ jobs:
 | project_name                | String | true     | The project name                                                                            |
 | aws_region                  | String | true     | The AWS region (default to eu-west-1)                                                       |
 | ecr_url                     | String | true     | The ECR url                                                                                 |
-| chart_museum_url            | String | true     | The ChartMuseum URL                                                                         |
+| chart_museum_url            | String | false    | The ChartMuseum URL (DEPRECATED)                                                            |
 | enable_trivy_exit           | String | false    | Enable Trivy failure when CVE are found, you can deactivate this behavior (default to true) |
 | SLACK_BOT_TOKEN             | Secret | true     | The slack bot token                                                                         |
 | SONAR_TOKEN                 | Secret | true     | The sonar token                                                                             |
