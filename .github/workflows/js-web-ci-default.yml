@@ -142,7 +142,7 @@ jobs:
         id: get_version
         run: |
           echo "project_name=$(awk -F'"' '/"name": ".+"/{ print $4; exit; }' package.json)" >> $GITHUB_OUTPUT
-          echo "project_version=$(awk -F'"' '/"version": ".+"/{ print $4; exit; }' package.json)" >> $GITHUB_OUTPUT
+          echo "project_version=$(awk -F'"' '/"version": ".+"/{ print $4; exit; }' package.json)-${{ github.run_id }}-${{ github.run_number }}" >> $GITHUB_OUTPUT
           echo "project_description=$(awk -F'"' '/"description": ".+"/{ print $4; exit; }' package.json)" >> $GITHUB_OUTPUT
 
       # Npm compile and tests
@@ -372,54 +372,42 @@ jobs:
       - name: Push images on ECR
         if:
           contains('refs/heads/main', github.ref) ||
-          contains('refs/heads/release', github.ref)
+          contains('refs/heads/release', github.ref) ||
+          contains('refs/heads/develop', github.ref)
         run: |
           aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin '${{ inputs.ecr_url }}/${{ inputs.project_name }}-service'
           docker push ${{ inputs.ecr_url }}/${{ inputs.project_name }}-service:${{ steps.get_version.outputs.project_version }}
           aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin '${{ inputs.ecr_url }}/${{ inputs.project_name }}-metrics'
           docker push ${{ inputs.ecr_url }}/${{ inputs.project_name }}-metrics:${{ steps.get_version.outputs.project_version }}
 
-      # Push docker on ECR if develop branche
-      - name: Push snapshot images on ECR
-        if:
+#      # Push docker on ECR if develop branche
+#      - name: Push snapshot images on ECR
+#        if:
+#          contains('refs/heads/develop', github.ref)
+#        run: |
+#          aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin '${{ inputs.ecr_url }}/${{ inputs.project_name }}-service-snapshot'
+#          docker push ${{ inputs.ecr_url }}/${{ inputs.project_name }}-service-snapshot:${{ steps.get_version.outputs.project_version }}
+#          aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin '${{ inputs.ecr_url }}/${{ inputs.project_name }}-metrics-snapshot'
+#          docker push ${{ inputs.ecr_url }}/${{ inputs.project_name }}-metrics-snapshot:${{ steps.get_version.outputs.project_version }}
+
+#      # Helm configure if master or release branches
+#      - name: Configure Helm s3 plugin
+#        if:
+#          contains('refs/heads/main', github.ref) ||
+#          contains('refs/heads/develop', github.ref) ||
+#          contains('refs/heads/release', github.ref)
+#        run: |
+#          helm plugin install https://github.com/hypnoglow/helm-s3.git
+
+      # Push Helm chart on OCI if master, release or develop branches
+      - name: Push charts on OCI
+        if: |
+          contains('refs/heads/main', github.ref) ||
+          contains('refs/heads/release', github.ref) ||
           contains('refs/heads/develop', github.ref)
         run: |
-          aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin '${{ inputs.ecr_url }}/${{ inputs.project_name }}-service-snapshot'
-          docker push ${{ inputs.ecr_url }}/${{ inputs.project_name }}-service-snapshot:${{ steps.get_version.outputs.project_version }}
-          aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin '${{ inputs.ecr_url }}/${{ inputs.project_name }}-metrics-snapshot'
-          docker push ${{ inputs.ecr_url }}/${{ inputs.project_name }}-metrics-snapshot:${{ steps.get_version.outputs.project_version }}
-
-      # Helm configure if master or release branches
-      - name: Configure Helm s3 plugin
-        if:
-          contains('refs/heads/main', github.ref) ||
-          contains('refs/heads/develop', github.ref) ||
-          contains('refs/heads/release', github.ref)
-        run: |
-          helm plugin install https://github.com/hypnoglow/helm-s3.git
-
-      - name: Add bruxless helm repo
-        if:
-          contains('refs/heads/main', github.ref) ||
-          contains('refs/heads/develop', github.ref) ||
-          contains('refs/heads/release', github.ref)
-        run: |
-          helm repo add bruxless ${{ inputs.chart_museum_url }}
-
-      # Push Helm chart on S3 if master or release branches
-      - name: Push charts on S3
-        if:
-          contains('refs/heads/main', github.ref) ||
-          contains('refs/heads/release', github.ref)
-        run: |
-          helm s3 push target/helm/${{ inputs.project_name }}-${{ steps.get_version.outputs.project_version }}.tgz bruxless
-
-      # Push Helm chart on S3 if develop branche (allow helm push overwrite)
-      - name: Push snapshot charts on S3
-        if:
-          contains('refs/heads/develop', github.ref)
-        run: |
-          helm s3 push --force target/helm/${{ inputs.project_name }}-${{ steps.get_version.outputs.project_version }}.tgz bruxless
+          aws ecr get-login-password --region ${{ inputs.aws_region }} | helm registry login --username AWS --password-stdin ${{ inputs.ecr_url }}
+          helm push ${{ inputs.project_name }}-service/target/helm/${{ inputs.project_name }}-${{ steps.get_version.outputs.project_version }}.tgz oci://${{ inputs.ecr_url }}
 
       # Slack message if succeed
       - name: Slack - ci - succeed
