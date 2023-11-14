@@ -205,7 +205,7 @@ jobs:
 
       # Dependencies checking
       - name: Trivy scan maven
-        uses: aquasecurity/trivy-action@0.13.0
+        uses: aquasecurity/trivy-action@0.14.0
         with:
           scan-type: 'fs'
           exit-code: '1'
@@ -318,7 +318,7 @@ jobs:
 
       # Dependencies checking
       - name: Trivy scan docker db
-        uses: aquasecurity/trivy-action@0.13.0
+        uses: aquasecurity/trivy-action@0.14.0
         if: ${{ inputs.enable_database_docker }}
         with:
           image-ref: 'bruxless/${{ inputs.project_name }}-db:${{ steps.get_version.outputs.project_version }}'
@@ -349,7 +349,7 @@ jobs:
           path: ${{github.workspace}}/trivy_docker_db.sarif
 
       - name: Trivy scan docker service
-        uses: aquasecurity/trivy-action@0.13.0
+        uses: aquasecurity/trivy-action@0.14.0
         with:
           image-ref: 'bruxless/${{ inputs.project_name }}-service:${{ steps.get_version.outputs.project_version }}'
           exit-code: '1'
