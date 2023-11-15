@@ -170,6 +170,15 @@ jobs:
           name: npm
           path: ${{github.workspace}}/eslint_npm.sarif
 
+      - name: NodeJS CycloneDX
+        run: npm run cyclonedx
+      - name: CycloneDX upload result
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: cyclonedx-bom-xlm
+          path: ${{github.workspace}}/target/bom.xml
+
       # Sonar analysis
       - name: SonarCloud scan
         uses: sonarsource/sonarcloud-github-action@master
@@ -502,6 +511,7 @@ jobs:
             trivy_docker_metrics.sarif
             hadolint-service.sarif
             hadolint-metrics.sarif
+            target/bom.xml
 
       # Slack message for release
       - name: Slack - ci_release - succeed

@@ -182,6 +182,12 @@ jobs:
       - name: Maven package
         run: mvn -B install -Pci -DskipTests -Dfull.build.number=${{ github.run_id }}-${{ github.run_number }} --file pom.xml
 
+      - name: Upload Cyclonedx bom
+        uses: actions/upload-artifact@v3
+        with:
+          name: cyclonedx-bom-xml
+          path:  ${{github.workspace}}/target/bom.xml
+
       # Sonar analysis
       - name: SonarCloud scan
         env:
@@ -550,6 +556,7 @@ jobs:
             hadolint-base-liquibase.sarif
             hadolint-db.sarif
             hadolint-service.sarif
+            target/bom.xml
 
       # Slack message for release
       - name: Slack - ci_release - succeed
