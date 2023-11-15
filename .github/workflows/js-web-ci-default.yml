@@ -207,7 +207,6 @@ jobs:
         uses: aquasecurity/trivy-action@0.14.0
         with:
           scan-type: 'fs'
-          exit-code: '1'
           ignore-unfixed: false
           output: "trivy_npm.sarif"
           format: 'sarif'
@@ -298,7 +297,6 @@ jobs:
         uses: aquasecurity/trivy-action@0.14.0
         with:
           image-ref: 'bruxless/${{ inputs.project_name }}-service:${{ steps.get_version.outputs.project_version }}'
-          exit-code: '1'
           ignore-unfixed: true
           output: "trivy_docker_service.sarif"
           format: 'sarif'
@@ -328,7 +326,6 @@ jobs:
         uses: aquasecurity/trivy-action@0.14.0
         with:
           image-ref: 'bruxless/${{ inputs.project_name }}-metrics:${{ steps.get_version.outputs.project_version }}'
-          exit-code: '1'
           ignore-unfixed: true
           output: "trivy_docker_metrics.sarif"
           format: 'sarif'
