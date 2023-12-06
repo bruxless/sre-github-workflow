@@ -1,4 +1,4 @@
-name: CI for JS (NPN) microservice
+name: CI for JS (NPM) microservice
 
 on:
   workflow_call:
