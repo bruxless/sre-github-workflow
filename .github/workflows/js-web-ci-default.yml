@@ -155,7 +155,7 @@ jobs:
 
       # Npm compile and tests
       - name: NodeJS install
-        run: npm install
+        run: npm ci
       - name: NodeJS compile
         run: npm run build
       - name: NodeJS test
