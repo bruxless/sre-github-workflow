@@ -14,10 +14,10 @@ on:
         required: false
         default: "17"
       helm_version:
-        description: "The helm version (default to 3.12.0)"
+        description: "The helm version (default to 3.13.2)"
         type: string
         required: false
-        default: "3.12.0"
+        default: "3.13.2"
       slack_channel_id_ci:
         description: "The CI Slack channel's id"
         type: string
