@@ -204,7 +204,7 @@ jobs:
 
       # Dependencies checking
       - name: Trivy scan npm
-        uses: aquasecurity/trivy-action@0.14.0
+        uses: aquasecurity/trivy-action@0.16.0
         with:
           scan-type: 'fs'
           ignore-unfixed: false
@@ -294,7 +294,7 @@ jobs:
 
       # Dependencies checking
       - name: Trivy scan result docker service
-        uses: aquasecurity/trivy-action@0.14.0
+        uses: aquasecurity/trivy-action@0.16.0
         with:
           image-ref: 'bruxless/${{ inputs.project_name }}-service:${{ steps.get_version.outputs.project_version }}'
           ignore-unfixed: true
@@ -323,7 +323,7 @@ jobs:
           name: trivy-docker-service
           path: ${{github.workspace}}/trivy_docker_service.sarif
       - name: Trivy scan result docker metrics
-        uses: aquasecurity/trivy-action@0.14.0
+        uses: aquasecurity/trivy-action@0.16.0
         with:
           image-ref: 'bruxless/${{ inputs.project_name }}-metrics:${{ steps.get_version.outputs.project_version }}'
           ignore-unfixed: true
