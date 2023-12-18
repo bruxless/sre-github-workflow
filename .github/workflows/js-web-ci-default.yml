@@ -165,7 +165,7 @@ jobs:
         run: npm run lint
       - name: Lint upload result npm
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: npm
           path: ${{github.workspace}}/eslint_npm.sarif
@@ -174,7 +174,7 @@ jobs:
         run: npm run cyclonedx
       - name: CycloneDX upload result
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: cyclonedx-bom-xlm
           path: ${{github.workspace}}/target/bom.xml
@@ -229,7 +229,7 @@ jobs:
 
       - name: Trivy upload result npm
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: trivy-npm
           path: ${{github.workspace}}/trivy_npm.sarif
@@ -273,13 +273,13 @@ jobs:
 
       - name: Upload Hadolint service result
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: hadolint-service
           path: ${{github.workspace}}/hadolint-service.sarif
       - name: Upload Hadolint metrics result
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: hadolint-metrics
           path: ${{github.workspace}}/hadolint-metrics.sarif
@@ -318,7 +318,7 @@ jobs:
 
       - name: Trivy upload result docker service
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: trivy-docker-service
           path: ${{github.workspace}}/trivy_docker_service.sarif
@@ -348,7 +348,7 @@ jobs:
 
       - name: Trivy upload result docker metrics
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: trivy-docker-metrics
           path: ${{github.workspace}}/trivy_docker_metrics.sarif

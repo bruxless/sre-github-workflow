@@ -183,7 +183,7 @@ jobs:
         run: mvn -B install -Pci -DskipTests -Dfull.build.number=${{ github.run_id }}-${{ github.run_number }} --file pom.xml
 
       - name: Upload Cyclonedx bom
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: cyclonedx-bom-xml
           path:  ${{github.workspace}}/target/bom.xml
@@ -237,7 +237,7 @@ jobs:
       # Save trivy result as artifact
       - name: Trivy upload result maven
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: trivy-maven
           path: ${{github.workspace}}/trivy_maven.sarif
@@ -281,25 +281,25 @@ jobs:
           format: sarif
 
       - name: Upload Hadolint base-java${{ inputs.java_version }} result
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: hadolint-base-java${{ inputs.java_version }}
           path: ${{github.workspace}}/hadolint-base-java${{ inputs.java_version }}.sarif
       - name: Upload Hadolint base-liquibase result
         if: ${{ always() && inputs.enable_database_docker }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: hadolint-base-liquibase
           path: ${{github.workspace}}/hadolint-base-liquibase.sarif
       - name: Upload Hadolint db result
         if: ${{ always() && inputs.enable_database_docker }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: hadolint-db
           path: ${{github.workspace}}/hadolint-db.sarif
       - name: Upload Hadolint service result
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: hadolint-service
           path: ${{github.workspace}}/hadolint-service.sarif
@@ -347,7 +347,7 @@ jobs:
           fi
       - name: Trivy upload result docker db
         if: ${{ always() && inputs.enable_database_docker }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: trivy-docker-db
           path: ${{github.workspace}}/trivy_docker_db.sarif
@@ -376,7 +376,7 @@ jobs:
           fi
       - name: Trivy upload result docker service
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: trivy-docker-service
           path: ${{github.workspace}}/trivy_docker_service.sarif
