@@ -179,17 +179,17 @@ jobs:
 
       # Maven compile and tests
       - name: Maven compile
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
         run: mvn -B compile -Pci -Dfull.build.number=${{ github.run_id }}-${{ github.run_number }} --file pom.xml
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Maven tests
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
         run: mvn -B integration-test -Pci -Dfull.build.number=${{ github.run_id }}-${{ github.run_number }} --file pom.xml
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Maven package
-        run: mvn -B install -Pci -DskipTests -Dfull.build.number=${{ github.run_id }}-${{ github.run_number }} --file pom.xml
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+        run: mvn -B install -Pci -DskipTests -Dfull.build.number=${{ github.run_id }}-${{ github.run_number }} --file pom.xml
 
       - name: Upload Cyclonedx bom
         uses: actions/upload-artifact@v4
