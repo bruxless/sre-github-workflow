@@ -82,6 +82,9 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+
     steps:
 
       # Checkout project
@@ -177,10 +180,16 @@ jobs:
       # Maven compile and tests
       - name: Maven compile
         run: mvn -B compile -Pci -Dfull.build.number=${{ github.run_id }}-${{ github.run_number }} --file pom.xml
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Maven tests
         run: mvn -B integration-test -Pci -Dfull.build.number=${{ github.run_id }}-${{ github.run_number }} --file pom.xml
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Maven package
         run: mvn -B install -Pci -DskipTests -Dfull.build.number=${{ github.run_id }}-${{ github.run_number }} --file pom.xml
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Cyclonedx bom
         uses: actions/upload-artifact@v4
