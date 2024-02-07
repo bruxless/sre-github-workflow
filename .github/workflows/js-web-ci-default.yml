@@ -7,7 +7,7 @@ on:
         description: "The node version (default to 18)"
         type: string
         required: false
-        default: "18"
+        default: "20"
       helm_version:
         description: "The helm version (default to 3.13.2)"
         type: string
@@ -157,7 +157,7 @@ jobs:
       - name: NodeJS install
         run: npm ci
       - name: NodeJS compile
-        run: npm run build
+        run: npm run build --if-present
       - name: NodeJS test
         run: npm run test:coverage
 
