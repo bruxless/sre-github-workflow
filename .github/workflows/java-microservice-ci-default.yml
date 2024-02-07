@@ -128,7 +128,7 @@ jobs:
       # Slack message start
       - name: Slack - ci - started
         id: slack
-        uses: slackapi/slack-github-action@v1.24.0
+        uses: slackapi/slack-github-action@v1.25.0
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
         with:
@@ -449,7 +449,7 @@ jobs:
       # Slack message if succeed
       - name: Slack - ci - succeed
         if: success()
-        uses: slackapi/slack-github-action@v1.24.0
+        uses: slackapi/slack-github-action@v1.25.0
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN}}
         with:
@@ -490,7 +490,7 @@ jobs:
       # Slack message if failed
       - name: Slack - ci - failed
         if: failure()
-        uses: slackapi/slack-github-action@v1.24.0
+        uses: slackapi/slack-github-action@v1.25.0
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN}}
         with:
@@ -568,7 +568,7 @@ jobs:
           contains('refs/heads/main', github.ref) ||
           contains('refs/heads/release', github.ref)
           )
-        uses: slackapi/slack-github-action@v1.24.0
+        uses: slackapi/slack-github-action@v1.25.0
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN}}
         with:
@@ -612,7 +612,7 @@ jobs:
           contains('refs/heads/main', github.ref) ||
           contains('refs/heads/release', github.ref)
           )
-        uses: slackapi/slack-github-action@v1.24.0
+        uses: slackapi/slack-github-action@v1.25.0
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN}}
         with:
