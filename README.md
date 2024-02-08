@@ -1,20 +1,20 @@
-# Reusable Github workflow for Bruxless
+# Reusable GitHub workflow for Bruxless
 
 ## Workflow available
 
 <!-- TOC -->
-* [Reusable Github workflow for Bruxless](#reusable-github-workflow-for-bruxless)
+* [Reusable GitHub workflow for Bruxless](#reusable-github-workflow-for-bruxless)
   * [Workflow available](#workflow-available)
   * [Usage](#usage)
     * [Java Micro-Service CI](#java-micro-service-ci)
+      * [Parameters](#parameters)
+      * [Example](#example)
+    * [Java Micro-Service Release](#java-micro-service-release)
       * [Parameters](#parameters-1)
       * [Example](#example-1)
-    * [Java Micro-Service Release](#java-micro-service-release)
+    * [Javascript web Micro-Service CI](#javascript-web-micro-service-ci)
       * [Parameters](#parameters-2)
       * [Example](#example-2)
-    * [Javascript web Micro-Service CI](#javascript-web-micro-service-ci)
-      * [Parameters](#parameters-3)
-      * [Example](#example-3)
 <!-- TOC -->
 
 ## Usage
