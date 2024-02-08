@@ -161,6 +161,13 @@ jobs:
       - name: NodeJS test
         run: npm run test:coverage
 
+      - name: Upload test reports
+        uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: test-reports
+          path: ${{github.workspace}}/target/tests
+
       - name: NodeJS lint
         run: npm run lint
       - name: Lint upload result npm
@@ -173,7 +180,6 @@ jobs:
       - name: NodeJS CycloneDX
         run: npm run cyclonedx
       - name: CycloneDX upload result
-        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: cyclonedx-bom-xlm

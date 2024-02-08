@@ -188,6 +188,13 @@ jobs:
           name: cyclonedx-bom-xml
           path:  ${{github.workspace}}/target/bom.xml
 
+      - name: Upload test reports
+        uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: test-reports
+          path: ${{github.workspace}}/**/test-reports
+
       # Sonar analysis
       - name: SonarCloud scan
         env:
