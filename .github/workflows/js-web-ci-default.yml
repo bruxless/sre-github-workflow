@@ -198,7 +198,6 @@ jobs:
             -Dsonar.organization=${{ inputs.sonar_organization }}
             -Dsonar.host.url=${{ inputs.sonar_host_url }}
             -Dsonar.projectKey=${{ inputs.sonar_project_key }}
-            -Dsonar.javascript.lcov.reportPaths=target/tests/coverage/lcov.info
       - name: SonarCloud Quality Gate check
         id: sonarcloud-quality-gate-check
         if:
