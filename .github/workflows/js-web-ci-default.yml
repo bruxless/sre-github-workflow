@@ -158,8 +158,10 @@ jobs:
         run: npm ci
       - name: NodeJS compile
         run: npm run build --if-present
-      - name: NodeJS test
-        run: npm run test:coverage
+      - name: NodeJS unit test
+        run: npm run test:unit
+      - name: NodeJS integration test
+        run: npm run test:integration
 
       - name: Upload test reports
         uses: actions/upload-artifact@v4
