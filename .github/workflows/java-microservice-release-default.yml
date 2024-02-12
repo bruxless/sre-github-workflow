@@ -50,7 +50,7 @@ jobs:
     steps:
       - name: retrieve bruxless github apps token
         id: bruxless-action
-        uses: getsentry/action-github-app-token@v2
+        uses: getsentry/action-github-app-token@v3
         with:
           app_id: ${{ inputs.github_app_id }}
           private_key: ${{ secrets.BRUXLESS_GH_APP_KEY }}
