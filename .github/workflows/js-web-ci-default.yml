@@ -177,7 +177,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: npm
-          path: ${{github.workspace}}/eslint_npm.sarif
+          path: ${{github.workspace}}/target/eslint_npm.sarif
 
       - name: NodeJS CycloneDX
         run: npm run cyclonedx
@@ -185,7 +185,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: cyclonedx-bom-xlm
-          path: ${{github.workspace}}/target/bom.xml
+          path: ${{github.workspace}}/target/bom.*
 
       # Sonar analysis
       - name: SonarCloud scan
