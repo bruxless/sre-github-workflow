@@ -105,7 +105,7 @@ jobs:
 
       # Setup helm
       - name: Set up helm ${{ inputs.helm_version }}
-        uses: azure/setup-helm@v4
+        uses: azure/setup-helm@v3
         with:
           version: ${{ inputs.helm_version }}
 
