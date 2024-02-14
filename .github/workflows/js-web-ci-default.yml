@@ -373,7 +373,7 @@ jobs:
 
       # Aws login if master or release branches
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4.0.1
+        uses: aws-actions/configure-aws-credentials@v4.0.2
         if:
           contains('refs/heads/main', github.ref) ||
           contains('refs/heads/develop', github.ref) ||
