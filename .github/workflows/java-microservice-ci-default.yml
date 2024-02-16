@@ -190,8 +190,8 @@ jobs:
       - name: Upload Cyclonedx bom
         uses: actions/upload-artifact@v4
         with:
-          name: cyclonedx-bom-xml
-          path:  ${{github.workspace}}/target/bom.xml
+          name: cyclonedx-bom
+          path:  ${{github.workspace}}/target/bom.*
 
       - name: Upload test reports
         uses: actions/upload-artifact@v4
