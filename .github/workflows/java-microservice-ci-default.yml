@@ -186,6 +186,13 @@ jobs:
         run: mvn -B integration-test -Pci -Dfull.build.number=${{ github.run_id }}-${{ github.run_number }} --file pom.xml
       - name: Maven package
         run: mvn -B install -Pci -DskipTests -Dfull.build.number=${{ github.run_id }}-${{ github.run_number }} --file pom.xml
+      - name: Upload test logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs
+          retention-days: 1
+          path: ${{github.workspace}}/**/*.log
 
       - name: Upload Cyclonedx bom
         uses: actions/upload-artifact@v4
