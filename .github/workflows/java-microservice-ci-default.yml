@@ -205,7 +205,9 @@ jobs:
         if: ${{ always() }}
         with:
           name: test-reports
-          path: ${{github.workspace}}/**/test-reports
+          path: |
+            ${{github.workspace}}/**/test-reports
+            ${{github.workspace}}/**/failsafe-reports
 
       # Sonar analysis
       - name: SonarCloud scan
