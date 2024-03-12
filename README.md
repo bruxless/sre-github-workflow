@@ -29,7 +29,6 @@
 |-----------------------------|--------|----------|---------------------------------------------------------------------------------------------|
 | java_distribution           | String | false    | The java distribution (default to temurin)                                                  |
 | java_version                | String | false    | The java version (default to 17)                                                            |
-| helm_version                | String | false    | The helm version (default to 3.12.0)                                                        |
 | slack_channel_id_ci         | String | true     | The CI Slack channel's id                                                                   |
 | slack_channel_id_ci_release | String | true     | The CI release Slack channel's id                                                           |
 | sonar_organization          | String | true     | The sonar organization                                                                      |
@@ -142,7 +141,6 @@ jobs:
       BRUXLESS_GH_APP_KEY: ${{ secrets.BRUXLESS_GH_APP_KEY }}
 ```
 
-
 ### Javascript web Micro-Service CI
 
 [Source](.github/workflows/js-web-ci-default.yml)
@@ -152,7 +150,6 @@ jobs:
 | Parameter Name              | Type   | Required | Description                                                                                 |
 |-----------------------------|--------|----------|---------------------------------------------------------------------------------------------|
 | node_version                | String | false    | The Node version (default to 16)                                                            |
-| helm_version                | String | false    | The helm version (default to 3.12.0)                                                        |
 | slack_channel_id_ci         | String | true     | The CI Slack channel's id                                                                   |
 | slack_channel_id_ci_release | String | true     | The CI release Slack channel's id                                                           |
 | sonar_organization          | String | true     | The sonar organization                                                                      |

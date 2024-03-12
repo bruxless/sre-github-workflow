@@ -13,11 +13,6 @@ on:
         type: string
         required: false
         default: "17"
-      helm_version:
-        description: "The helm version (default to 3.13.3)"
-        type: string
-        required: false
-        default: "3.13.3"
       slack_channel_id_ci:
         description: "The CI Slack channel's id"
         type: string
@@ -104,10 +99,8 @@ jobs:
           cache: maven
 
       # Setup helm
-      - name: Set up helm ${{ inputs.helm_version }}
+      - name: Set up helm
         uses: azure/setup-helm@v4
-        with:
-          version: ${{ inputs.helm_version }}
 
       # Cache Sonarcloud packages
       - name: Cache SonarCloud packages
