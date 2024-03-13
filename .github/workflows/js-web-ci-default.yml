@@ -304,29 +304,29 @@ jobs:
         uses: anchore/sbom-action@v0.15.9
         with:
           image: bruxless/${{ inputs.project_name }}-service-${{ steps.get_version.outputs.project_version }}
-          format: cyclonedx
-          output-file: target/docker-${{ inputs.project_name }}-service-${{ steps.get_version.outputs.project_version }}.xml
+          format: cyclonedx-json
+          output-file: target/docker-${{ inputs.project_name }}-service-${{ steps.get_version.outputs.project_version }}.json
 
       - name: Upload sbom docker service
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: docker-${{ inputs.project_name }}-service-${{ steps.get_version.outputs.project_version }}.xml
-          path: ${{github.workspace}}/target/docker-${{ inputs.project_name }}-service-${{ steps.get_version.outputs.project_version }}.xml
+          name: docker-${{ inputs.project_name }}-service-${{ steps.get_version.outputs.project_version }}.json
+          path: ${{github.workspace}}/target/docker-${{ inputs.project_name }}-service-${{ steps.get_version.outputs.project_version }}.json
 
       - name: Generate sbom docker metrics
         uses: anchore/sbom-action@v0.15.9
         with:
           image: bruxless/${{ inputs.project_name }}-metrics-${{ steps.get_version.outputs.project_version }}
-          format: cyclonedx
-          output-file: target/docker-${{ inputs.project_name }}-metrics-${{ steps.get_version.outputs.project_version }}.xml
+          format: cyclonedx-json
+          output-file: target/docker-${{ inputs.project_name }}-metrics-${{ steps.get_version.outputs.project_version }}.json
 
       - name: Upload sbom docker metrics
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: docker-${{ inputs.project_name }}-metrics-${{ steps.get_version.outputs.project_version }}.xml
-          path: ${{github.workspace}}/target/docker-${{ inputs.project_name }}-metrics-${{ steps.get_version.outputs.project_version }}.xml
+          name: docker-${{ inputs.project_name }}-metrics-${{ steps.get_version.outputs.project_version }}.json
+          path: ${{github.workspace}}/target/docker-${{ inputs.project_name }}-metrics-${{ steps.get_version.outputs.project_version }}.json
 
       # Dependencies checking
       - name: Trivy scan result docker service
@@ -544,9 +544,9 @@ jobs:
             trivy_docker_metrics.sarif
             hadolint-service.sarif
             hadolint-metrics.sarif
-            target/bom.xml
-            target/docker-${{ inputs.project_name }}-service-${{ steps.get_version.outputs.project_version }}.xml
-            target/docker-${{ inputs.project_name }}-metrics-${{ steps.get_version.outputs.project_version }}.xml
+            target/bom.json
+            target/docker-${{ inputs.project_name }}-service-${{ steps.get_version.outputs.project_version }}.json
+            target/docker-${{ inputs.project_name }}-metrics-${{ steps.get_version.outputs.project_version }}.json
 
       # Slack message for release
       - name: Slack - ci_release - succeed
