@@ -297,7 +297,7 @@ jobs:
       - name: Generate sbom docker service
         uses: anchore/sbom-action@v0.15.9
         with:
-          image: bruxless/${{ inputs.project_name }}-service-${{ steps.get_version.outputs.project_version }}
+          image: docker.io/bruxless/${{ inputs.project_name }}-service:${{ steps.get_version.outputs.project_version }}
           format: cyclonedx-json
           output-file: target/docker-${{ inputs.project_name }}-service-${{ steps.get_version.outputs.project_version }}.json
 
@@ -311,7 +311,7 @@ jobs:
       - name: Generate sbom docker metrics
         uses: anchore/sbom-action@v0.15.9
         with:
-          image: bruxless/${{ inputs.project_name }}-metrics-${{ steps.get_version.outputs.project_version }}
+          image: docker.io/bruxless/${{ inputs.project_name }}-metrics:${{ steps.get_version.outputs.project_version }}
           format: cyclonedx-json
           output-file: target/docker-${{ inputs.project_name }}-metrics-${{ steps.get_version.outputs.project_version }}.json
 
