@@ -365,7 +365,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: docker-sbom-${{ inputs.project_name }}-service.json
-          path: ${{github.workspace}}/target/docker-sbom-${{ inputs.project_name }}-service-.json
+          path: ${{github.workspace}}/target/docker-sbom-${{ inputs.project_name }}-service.json
 
       # Dependencies checking
       - name: Trivy scan docker db
