@@ -59,12 +59,12 @@ on:
         description: "Trivy vulnerabilities levels for libraries"
         type: string
         required: false
-        default: : "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
+        default: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
       trivy_docker_vuln_severity:
         description: "Trivy vulnerabilities levels for dockerfiles"
         type: string
         required: false
-        default: : "CRITICAL,HIGH"
+        default: "CRITICAL,HIGH"
     secrets:
       SLACK_BOT_TOKEN:
         description: "The slack bot token"
