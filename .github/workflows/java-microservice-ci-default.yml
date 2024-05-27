@@ -56,7 +56,7 @@ on:
         required: false
         default: true
       trivy_lib_vuln_severity:
-        description: "Trivy vulnerabilities level for libraries"
+        description: "Trivy vulnerabilities levels for libraries"
         type: string
         required: false
         default: : "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"

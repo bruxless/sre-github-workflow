@@ -25,25 +25,26 @@
 
 #### Parameters
 
-| Parameter Name              | Type   | Required | Description                                                                                 |
-|-----------------------------|--------|----------|---------------------------------------------------------------------------------------------|
-| java_distribution           | String | false    | The java distribution (default to temurin)                                                  |
-| java_version                | String | false    | The java version (default to 17)                                                            |
-| slack_channel_id_ci         | String | true     | The CI Slack channel's id                                                                   |
-| slack_channel_id_ci_release | String | true     | The CI release Slack channel's id                                                           |
-| sonar_organization          | String | true     | The sonar organization                                                                      |
-| sonar_host_url              | String | true     | The sonar host url                                                                          |
-| sonar_project_key           | String | true     | The sonar project key                                                                       |
-| project_name                | String | true     | The project name                                                                            |
-| aws_region                  | String | true     | The AWS region (default to eu-west-1)                                                       |
-| ecr_url                     | String | true     | The ECR url                                                                                 |
-| chart_museum_url            | String | false    | The ChartMuseum URL (DEPRECATED)                                                            |
-| enable_trivy_exit           | String | false    | Enable Trivy failure when CVE are found, you can deactivate this behavior (default to true) |
-| enable_database_docker      | String | false    | Enable the database docker build (default to true)                                          |
-| SLACK_BOT_TOKEN             | Secret | true     | The slack bot token                                                                         |
-| SONAR_TOKEN                 | Secret | true     | The sonar token                                                                             |
-| AWS_ACCESS_KEY_ID           | Secret | true     | The AWS access key                                                                          |
-| AWS_SECRET_ACCESS_KEY       | Secret | true     | The AWS secret access key                                                                   |
+| Parameter Name              | Type   | Required | Description                                                                                |
+|-----------------------------|--------|----------|--------------------------------------------------------------------------------------------|
+| java_distribution           | String | false    | The java distribution (default to temurin)                                                 |
+| java_version                | String | false    | The java version (default to 17)                                                           |
+| slack_channel_id_ci         | String | true     | The CI Slack channel's id                                                                  |
+| slack_channel_id_ci_release | String | true     | The CI release Slack channel's id                                                          |
+| sonar_organization          | String | true     | The sonar organization                                                                     |
+| sonar_host_url              | String | true     | The sonar host url                                                                         |
+| sonar_project_key           | String | true     | The sonar project key                                                                      |
+| project_name                | String | true     | The project name                                                                           |
+| aws_region                  | String | true     | The AWS region (default to eu-west-1)                                                      |
+| ecr_url                     | String | true     | The ECR url                                                                                |
+| chart_museum_url            | String | false    | The ChartMuseum URL (DEPRECATED)                                                           |
+| trivy_lib_vuln_severity     | String | false    | Trivy vulnerabilities levels for libraries (default to 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL') |
+| trivy_docker_vuln_severity  | String | false    | Trivy vulnerabilities levels for dockerfiles (default to 'CRITICAL,HIGH')                  |
+| enable_database_docker      | String | false    | Enable the database docker build (default to true)                                         |
+| SLACK_BOT_TOKEN             | Secret | true     | The slack bot token                                                                        |
+| SONAR_TOKEN                 | Secret | true     | The sonar token                                                                            |
+| AWS_ACCESS_KEY_ID           | Secret | true     | The AWS access key                                                                         |
+| AWS_SECRET_ACCESS_KEY       | Secret | true     | The AWS secret access key                                                                  |
 
 #### Example
 
@@ -147,23 +148,24 @@ jobs:
 
 #### Parameters
 
-| Parameter Name              | Type   | Required | Description                                                                                 |
-|-----------------------------|--------|----------|---------------------------------------------------------------------------------------------|
-| node_version                | String | false    | The Node version (default to 16)                                                            |
-| slack_channel_id_ci         | String | true     | The CI Slack channel's id                                                                   |
-| slack_channel_id_ci_release | String | true     | The CI release Slack channel's id                                                           |
-| sonar_organization          | String | true     | The sonar organization                                                                      |
-| sonar_host_url              | String | true     | The sonar host url                                                                          |
-| sonar_project_key           | String | true     | The sonar project key                                                                       |
-| project_name                | String | true     | The project name                                                                            |
-| aws_region                  | String | true     | The AWS region (default to eu-west-1)                                                       |
-| ecr_url                     | String | true     | The ECR url                                                                                 |
-| chart_museum_url            | String | false    | The ChartMuseum URL (DEPRECATED)                                                            |
-| enable_trivy_exit           | String | false    | Enable Trivy failure when CVE are found, you can deactivate this behavior (default to true) |
-| SLACK_BOT_TOKEN             | Secret | true     | The slack bot token                                                                         |
-| SONAR_TOKEN                 | Secret | true     | The sonar token                                                                             |
-| AWS_ACCESS_KEY_ID           | Secret | true     | The AWS access key                                                                          |
-| AWS_SECRET_ACCESS_KEY       | Secret | true     | The AWS secret access key                                                                   |
+| Parameter Name              | Type   | Required | Description                                                                                |
+|-----------------------------|--------|----------|--------------------------------------------------------------------------------------------|
+| node_version                | String | false    | The Node version (default to 16)                                                           |
+| slack_channel_id_ci         | String | true     | The CI Slack channel's id                                                                  |
+| slack_channel_id_ci_release | String | true     | The CI release Slack channel's id                                                          |
+| sonar_organization          | String | true     | The sonar organization                                                                     |
+| sonar_host_url              | String | true     | The sonar host url                                                                         |
+| sonar_project_key           | String | true     | The sonar project key                                                                      |
+| project_name                | String | true     | The project name                                                                           |
+| aws_region                  | String | true     | The AWS region (default to eu-west-1)                                                      |
+| ecr_url                     | String | true     | The ECR url                                                                                |
+| chart_museum_url            | String | false    | The ChartMuseum URL (DEPRECATED)                                                           |
+| trivy_lib_vuln_severity     | String | false    | Trivy vulnerabilities levels for libraries (default to 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL') |
+| trivy_docker_vuln_severity  | String | false    | Trivy vulnerabilities levels for dockerfiles (default to 'CRITICAL,HIGH')                  | 
+| SLACK_BOT_TOKEN             | Secret | true     | The slack bot token                                                                        |
+| SONAR_TOKEN                 | Secret | true     | The sonar token                                                                            |
+| AWS_ACCESS_KEY_ID           | Secret | true     | The AWS access key                                                                         |
+| AWS_SECRET_ACCESS_KEY       | Secret | true     | The AWS secret access key                                                                  |
 
 #### Example
 
