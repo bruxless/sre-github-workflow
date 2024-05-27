@@ -50,16 +50,21 @@ on:
         description: "The ChartMuseum URL"
         type: string
         required: false
-      enable_trivy_exit:
-        description: "Enable Trivy failure when CVE are found, you can deactivate this behavior"
-        type: boolean
-        required: false
-        default: true
       enable_database_docker:
         description: "Enable the database docker build"
         type: boolean
         required: false
         default: true
+      trivy_lib_vuln_severity:
+        description: "Trivy vulnerabilities level for libraries"
+        type: string
+        required: false
+        default: : "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
+      trivy_docker_vuln_severity:
+        description: "Trivy vulnerabilities levels for dockerfiles"
+        type: string
+        required: false
+        default: : "CRITICAL,HIGH"
     secrets:
       SLACK_BOT_TOKEN:
         description: "The slack bot token"
@@ -232,21 +237,9 @@ jobs:
           output: "trivy_maven.sarif"
           format: 'sarif'
           vuln-type: 'library'
-          severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
+          severity: '${{ inputs.trivy_lib_vuln_severity }}'
           scanners: 'vuln'
           timeout: '7m'
-
-      # Can be deleted when this issue is closed : https://github.com/aquasecurity/trivy-action/issues/228
-      - name: Check maven trivy results
-        if: inputs.enable_trivy_exit
-        run: |
-          if grep -qE 'UNKNOWN|LOW|MEDIUM|HIGH|CRITICAL' trivy_maven.sarif; then
-            echo "Vulnerabilities found"
-            exit 1
-          else
-            echo "No significant vulnerabilities found"
-            exit 0
-          fi
 
       # Save trivy result as artifact
       - name: Trivy upload result maven
@@ -377,7 +370,7 @@ jobs:
           output: "trivy_docker_db.sarif"
           format: 'sarif'
           vuln-type: 'os,library'
-          severity: 'HIGH,CRITICAL'
+          severity: '${{ inputs.trivy_docker_vuln_severity }}'
           scanners: 'vuln'
           timeout: '7m'
       # Can be deleted when this issue is closed : https://github.com/aquasecurity/trivy-action/issues/228
@@ -406,20 +399,10 @@ jobs:
           output: "trivy_docker_service.sarif"
           format: 'sarif'
           vuln-type: 'os,library'
-          severity: 'HIGH,CRITICAL'
+          severity: '${{ inputs.trivy_docker_vuln_severity }}'
           scanners: 'vuln'
           timeout: '7m'
-      # Can be deleted when this issue is closed : https://github.com/aquasecurity/trivy-action/issues/228
-      - name: Check docker service trivy results
-        if: inputs.enable_trivy_exit
-        run: |
-          if grep -qE 'HIGH|CRITICAL' trivy_docker_service.sarif; then
-            echo "Vulnerabilities found"
-            exit 1
-          else
-            echo "No significant vulnerabilities found"
-            exit 0
-          fi
+
       - name: Trivy upload result docker service
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
