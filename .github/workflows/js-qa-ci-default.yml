@@ -87,13 +87,22 @@ jobs:
             }
 
       - name: Install dependencies
-        run: CI=1 ENV=${{ inputs.environment }} npm ci
+        run: |
+          CI=1 \
+          ENV=${{ inputs.environment }} \
+          npm ci
 
       - name: Prepare Acceptance Tests
-        run: CI=1 ENV=${{ inputs.environment }} npm run prepare-test
+        run: |
+          CI=1 \
+          ENV=${{ inputs.environment }} \
+          npm run prepare-test
 
       - name: Run Acceptance Tests
-        run: CI=1 ENV=${{ inputs.environment }} npm run test
+        run:  |
+          CI=1 \
+          ENV=${{ inputs.environment }} \
+          npm run test
 
       - name: Upload Acceptance Results
         uses: actions/upload-artifact@v4
