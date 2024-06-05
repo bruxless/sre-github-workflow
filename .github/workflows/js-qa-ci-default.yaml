@@ -1,0 +1,273 @@
+name: Playwright Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      slack_channel_id_ci:
+        description: "The CI Slack channel's id"
+        type: string
+        required: true
+        default: "C076K1E0F7F"
+      sonar_organization:
+        description: "The sonar organization"
+        type: string
+        required: true
+      sonar_host_url:
+        description: "The sonar host url"
+        type: string
+        required: true
+      sonar_project_key:
+        description: "The sonar project key"
+        type: string
+        required: true
+      project_name:
+        description: "The project name"
+        type: string
+        required: true
+      trivy_lib_vuln_severity:
+        description: "Trivy vulnerabilities levels for libraries"
+        type: string
+        required: false
+        default: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
+    secrets:
+      SLACK_BOT_TOKEN:
+        description: "The slack bot token"
+        required: true
+      SONAR_TOKEN:
+        description: "The sonar token"
+        required: true
+
+jobs:
+  playwright_test:
+    timeout-minutes: 60
+
+    runs-on: bruxless-runners
+    container: mcr.microsoft.com/playwright:v1.44.1-jammy
+
+    steps:
+      # Checkout project
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Setup and uses
+      - name: Set up node ${{ inputs.node_version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node_version }}
+          cache: npm
+
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      # Slack message
+      - name: Slack - ci - started
+        id: slack
+        uses: slackapi/slack-github-action@v1.26.0
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN}}
+        with:
+          channel-id: ${{ inputs.slack_channel_id_ci }}
+          payload: |
+            {
+              "attachments": [
+                {
+                  "color": "62a0ea",
+                  "title": "Build ${{ github.run_id }}-${{ github.run_number }} started",
+                  "title_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                  "fields": [
+                    {
+                      "value": ":the_horns:",
+                      "short": true
+                    },
+                    {
+                      "title": "Status",
+                      "value": "In Progress",
+                      "short": true
+                    },
+                    {
+                      "title": "Repository",
+                      "value": "<https://github.com/${{ github.repository }}|${{ github.repository }}>",
+                      "short": false
+                    },
+                    {
+                      "title": "Branch",
+                      "value": "<https://github.com/${{ github.repository }}/tree/${{ github.ref_name }}|${{ github.ref_name }}>",
+                      "short": false
+                    }
+                  ]
+                }
+              ]
+            }
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare Acceptance Tests
+        run: npm run prepare-test
+
+      - name: Run Acceptance Tests
+        run: npm run test
+
+      - name: Upload Acceptance Results
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: test-report-html
+          path: target/test-report/
+          retention-days: 30
+      - name: Upload Acceptance Results
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: test-report-json
+          path: target/test-report.json
+          retention-days: 30
+
+      - name: NodeJS lint
+        run: npm run lint
+      - name: Lint upload result npm
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm
+          path: ${{github.workspace}}/target/eslint_npm.sarif
+
+      - name: NodeJS CycloneDX
+        run: npm run cyclonedx
+      - name: CycloneDX upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: cyclonedx-bom
+          path: ${{github.workspace}}/target/bom.*
+
+      # Sonar analysis
+      - name: SonarCloud scan
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=${{ inputs.sonar_organization }}
+            -Dsonar.host.url=${{ inputs.sonar_host_url }}
+            -Dsonar.projectKey=${{ inputs.sonar_project_key }}
+      - name: SonarCloud Quality Gate check
+        id: sonarcloud-quality-gate-check
+        if:
+          contains('refs/heads/main', github.ref) ||
+          contains('refs/heads/release', github.ref) ||
+          contains('refs/heads/develop', github.ref)
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      # Dependencies checking
+      - name: Trivy scan npm
+        uses: aquasecurity/trivy-action@0.21.0
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: false
+          output: "trivy_npm.sarif"
+          format: 'sarif'
+          vuln-type: 'library'
+          severity: '${{ inputs.trivy_lib_vuln_severity }}'
+          scanners: 'vuln'
+          timeout: '7m'
+
+      - name: Trivy upload result npm
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-npm
+          path: ${{github.workspace}}/trivy_npm.sarif
+
+      # Slack message if succeed
+      - name: Slack - ci - succeed
+        if: success()
+        uses: slackapi/slack-github-action@v1.26.0
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN}}
+        with:
+          channel-id: ${{ inputs.slack_channel_id_ci }}
+          update-ts: ${{ steps.slack.outputs.ts }}
+          payload: |
+            {
+              "attachments": [
+                {
+                  "color": "57e389",
+                  "title": "Build ${{ github.run_id }}-${{ github.run_number }} succeed",
+                  "title_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                  "fields": [
+                    {
+                      "value": ":clap:",
+                      "short": true
+                    },
+                    {
+                      "title": "Status",
+                      "value": "Succeed",
+                      "short": true
+                    },
+                    {
+                      "title": "Repository",
+                      "value": "<https://github.com/${{ github.repository }}|${{ github.repository }}>",
+                      "short": false
+                    },
+                    {
+                      "title": "Branch",
+                      "value": "<https://github.com/${{ github.repository }}/tree/${{ github.ref_name }}|${{ github.ref_name }}>",
+                      "short": false
+                    }
+                  ]
+                }
+              ]
+            }
+
+      # Slack message if failed
+      - name: Slack - ci - failed
+        if: failure()
+        uses: slackapi/slack-github-action@v1.26.0
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN}}
+        with:
+          channel-id: ${{ inputs.slack_channel_id_ci }}
+          update-ts: ${{ steps.slack.outputs.ts }}
+          payload: |
+            {
+              "attachments": [
+                {
+                  "color": "ed333b",
+                  "title": "Build ${{ github.run_id }}-${{ github.run_number }} failed",
+                  "title_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                  "fields": [
+                    {
+                      "value": ":-1:",
+                      "short": true
+                    },
+                    {
+                      "title": "Status",
+                      "value": "Failed",
+                      "short": true
+                    },
+                    {
+                      "title": "Repository",
+                      "value": "<https://github.com/${{ github.repository }}|${{ github.repository }}>",
+                      "short": false
+                    },
+                    {
+                      "title": "Branch",
+                      "value": "<https://github.com/${{ github.repository }}/tree/${{ github.ref_name }}|${{ github.ref_name }}>",
+                      "short": false
+                    }
+                  ]
+                }
+              ]
+            }
