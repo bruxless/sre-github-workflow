@@ -8,22 +8,6 @@ on:
         type: string
         required: true
         default: "C076K1E0F7F"
-      sonar_organization:
-        description: "The sonar organization"
-        type: string
-        required: true
-      sonar_host_url:
-        description: "The sonar host url"
-        type: string
-        required: true
-      sonar_project_key:
-        description: "The sonar project key"
-        type: string
-        required: true
-      project_name:
-        description: "The project name"
-        type: string
-        required: true
       trivy_lib_vuln_severity:
         description: "Trivy vulnerabilities levels for libraries"
         type: string
@@ -61,13 +45,6 @@ jobs:
         with:
           node-version: ${{ inputs.node_version }}
           cache: npm
-
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
 
       # Slack message
       - name: Slack - ci - started
@@ -149,28 +126,6 @@ jobs:
         with:
           name: cyclonedx-bom
           path: ${{github.workspace}}/target/bom.*
-
-      # Sonar analysis
-      - name: SonarCloud scan
-        uses: sonarsource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.organization=${{ inputs.sonar_organization }}
-            -Dsonar.host.url=${{ inputs.sonar_host_url }}
-            -Dsonar.projectKey=${{ inputs.sonar_project_key }}
-      - name: SonarCloud Quality Gate check
-        id: sonarcloud-quality-gate-check
-        if:
-          contains('refs/heads/main', github.ref) ||
-          contains('refs/heads/release', github.ref) ||
-          contains('refs/heads/develop', github.ref)
-        uses: sonarsource/sonarqube-quality-gate-action@master
-        timeout-minutes: 5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       # Dependencies checking
       - name: Trivy scan npm
