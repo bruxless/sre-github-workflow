@@ -3,8 +3,8 @@ name: Playwright Tests
 on:
   workflow_call:
     inputs:
-      slack_channel_id_ci:
-        description: "The CI Slack channel's id"
+      slack_channel_id_qa:
+        description: "The QA Slack channel's id"
         type: string
         required: true
         default: "C076K1E0F7F"
@@ -76,13 +76,13 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN}}
         with:
-          channel-id: ${{ inputs.slack_channel_id_ci }}
+          channel-id: ${{ inputs.slack_channel_id_qa }}
           payload: |
             {
               "attachments": [
                 {
                   "color": "62a0ea",
-                  "title": "Build ${{ github.run_id }}-${{ github.run_number }} started",
+                  "title": "QA ${{ github.run_id }}-${{ github.run_number }} started",
                   "title_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
                   "fields": [
                     {
@@ -136,7 +136,7 @@ jobs:
       - name: NodeJS lint
         run: npm run lint
       - name: Lint upload result npm
-        if: ${{ always() }}
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: npm
@@ -199,14 +199,14 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN}}
         with:
-          channel-id: ${{ inputs.slack_channel_id_ci }}
+          channel-id: ${{ inputs.slack_channel_id_qa }}
           update-ts: ${{ steps.slack.outputs.ts }}
           payload: |
             {
               "attachments": [
                 {
                   "color": "57e389",
-                  "title": "Build ${{ github.run_id }}-${{ github.run_number }} succeed",
+                  "title": "QA ${{ github.run_id }}-${{ github.run_number }} succeed",
                   "title_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
                   "fields": [
                     {
@@ -240,14 +240,14 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN}}
         with:
-          channel-id: ${{ inputs.slack_channel_id_ci }}
+          channel-id: ${{ inputs.slack_channel_id_qa }}
           update-ts: ${{ steps.slack.outputs.ts }}
           payload: |
             {
               "attachments": [
                 {
                   "color": "ed333b",
-                  "title": "Build ${{ github.run_id }}-${{ github.run_number }} failed",
+                  "title": "QA ${{ github.run_id }}-${{ github.run_number }} failed",
                   "title_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
                   "fields": [
                     {
