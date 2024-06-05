@@ -31,6 +31,10 @@ on:
         type: string
         required: false
         default: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
+      container:
+        description: "Container to use to run tests"
+        type: string
+        required: true
     secrets:
       SLACK_BOT_TOKEN:
         description: "The slack bot token"
@@ -44,7 +48,7 @@ jobs:
     timeout-minutes: 60
 
     runs-on: bruxless-runners
-    container: mcr.microsoft.com/playwright:v1.44.1-jammy
+    container: ${{ inputs.container }}
 
     steps:
       # Checkout project
