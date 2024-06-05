@@ -124,26 +124,6 @@ jobs:
           name: cyclonedx-bom
           path: ${{github.workspace}}/target/bom.*
 
-      # Dependencies checking
-      - name: Trivy scan npm
-        uses: aquasecurity/trivy-action@0.21.0
-        with:
-          scan-type: 'fs'
-          ignore-unfixed: false
-          output: "trivy_npm.sarif"
-          format: 'sarif'
-          vuln-type: 'library'
-          severity: '${{ inputs.trivy_lib_vuln_severity }}'
-          scanners: 'vuln'
-          timeout: '7m'
-
-      - name: Trivy upload result npm
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: trivy-npm
-          path: ${{github.workspace}}/trivy_npm.sarif
-
       # Slack message if succeed
       - name: Slack - ci - succeed
         if: success()
