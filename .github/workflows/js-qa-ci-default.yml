@@ -21,9 +21,6 @@ on:
       SLACK_BOT_TOKEN:
         description: "The slack bot token"
         required: true
-      SONAR_TOKEN:
-        description: "The sonar token"
-        required: true
 
 jobs:
   playwright_test:
