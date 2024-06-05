@@ -16,6 +16,10 @@ on:
         description: "Container to use to run tests"
         type: string
         required: true
+      environment:
+        description: "Tested environment (qa, staging or prod)"
+        type: string
+        required: true
     secrets:
       SLACK_BOT_TOKEN:
         description: "The slack bot token"
@@ -55,7 +59,7 @@ jobs:
               "attachments": [
                 {
                   "color": "62a0ea",
-                  "title": "QA ${{ github.run_id }}-${{ github.run_number }} started",
+                  "title": "QA ${{ github.run_id }}-${{ github.run_number }} started on ${{ inputs.environment }} env",
                   "title_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
                   "fields": [
                     {
@@ -83,13 +87,13 @@ jobs:
             }
 
       - name: Install dependencies
-        run: npm ci
+        run: CI=1 ENV=${{ inputs.environment }} npm ci
 
       - name: Prepare Acceptance Tests
-        run: npm run prepare-test
+        run: CI=1 ENV=${{ inputs.environment }} npm run prepare-test
 
       - name: Run Acceptance Tests
-        run: npm run test
+        run: CI=1 ENV=${{ inputs.environment }} npm run test
 
       - name: Upload Acceptance Results
         uses: actions/upload-artifact@v4
@@ -137,7 +141,7 @@ jobs:
               "attachments": [
                 {
                   "color": "57e389",
-                  "title": "QA ${{ github.run_id }}-${{ github.run_number }} succeed",
+                  "title": "QA ${{ github.run_id }}-${{ github.run_number }} succeed on ${{ inputs.environment }} env",
                   "title_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
                   "fields": [
                     {
@@ -178,7 +182,7 @@ jobs:
               "attachments": [
                 {
                   "color": "ed333b",
-                  "title": "QA ${{ github.run_id }}-${{ github.run_number }} failed",
+                  "title": "QA ${{ github.run_id }}-${{ github.run_number }} failed on ${{ inputs.environment }} env",
                   "title_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
                   "fields": [
                     {
