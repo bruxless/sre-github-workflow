@@ -18,13 +18,9 @@ on:
         required: true
       environment:
         description: "Tested environment (qa, staging or prod)"
-        type: choice
+        type: string
         required: true
         default: 'qa'
-        options:
-          - qa
-          - staging
-          - prod
     secrets:
       SLACK_BOT_TOKEN:
         description: "The slack bot token"
