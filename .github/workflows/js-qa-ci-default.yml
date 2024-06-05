@@ -8,11 +8,6 @@ on:
         type: string
         required: true
         default: "C076K1E0F7F"
-      trivy_lib_vuln_severity:
-        description: "Trivy vulnerabilities levels for libraries"
-        type: string
-        required: false
-        default: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
       container:
         description: "Container to use to run tests"
         type: string
