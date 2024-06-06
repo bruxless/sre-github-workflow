@@ -79,7 +79,7 @@ jobs:
                     },
                     {
                       "title": "Actor",
-                      "value": "${{ github.actor }}",
+                      "value": "${{ github.triggering_actor }}",
                       "short": false
                     }
                   ]
