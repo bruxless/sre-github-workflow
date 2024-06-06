@@ -83,11 +83,10 @@ jobs:
             }
 
       - name: tmp1
-        run: echo $GITHUB_ENV
+        run: echo $ENV_TEST
       - name: tmp2
-        run: echo "envTmp=$(cat $GITHUB_ENV)" >> $GITHUB_OUTPUT
-      - name: tmp3
-        run: echo ${{ steps.vars.outputs.envTmp }}
+        run: |
+          env
 
       - name: Install dependencies
         run: |
