@@ -87,6 +87,12 @@ jobs:
       - name: tmp2
         run: |
           env
+      - name: tmp3
+        run: |
+          cat $GITHUB_ENV
+      - name: tmp4
+        run: |
+          base64 -w 0 $GITHUB_ENV
 
       - name: Install dependencies
         run: |
