@@ -60,7 +60,7 @@ jobs:
               "attachments": [
                 {
                   "color": "62a0ea",
-                  "title": "QA ${{ run-name }} started on ${{ inputs.environment }} env",
+                  "title": "QA ${{ github.workflow }} started on ${{ inputs.environment }} env",
                   "title_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
                   "fields": [
                     {
@@ -151,7 +151,7 @@ jobs:
               "attachments": [
                 {
                   "color": "57e389",
-                  "title": "QA ${{ run-name }} succeed on ${{ inputs.environment }} env",
+                  "title": "QA ${{ github.workflow }} succeed on ${{ inputs.environment }} env",
                   "title_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
                   "fields": [
                     {
@@ -192,7 +192,7 @@ jobs:
               "attachments": [
                 {
                   "color": "ed333b",
-                  "title": "QA ${{ run-name }} failed on ${{ inputs.environment }} env",
+                  "title": "QA ${{ github.workflow }} failed on ${{ inputs.environment }} env",
                   "title_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
                   "fields": [
                     {
