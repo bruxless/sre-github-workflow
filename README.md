@@ -200,3 +200,66 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 ```
+
+### Javascript QA tests
+
+[Source](.github/workflows/js-qa-ci-default.yml)
+
+#### Parameters
+
+| Parameter Name      | Type   | Required | Description                                                          |
+|---------------------|--------|----------|----------------------------------------------------------------------|
+| slack_channel_id_qa | String | true     | The CI Slack channel's id                                            |
+| runner              | String | true     | Runner to use to run tests (usually 'bruxless-runner')               |
+| container           | String | true     | Container to use to run tests                                        |
+| environment         | String | true     | Tested environment (qa, staging or prod)                             |
+| SLACK_BOT_TOKEN     | Secret | true     | The slack bot token                                                  |
+| ENV_FILE            | Secret | true     | The env file, containing variables and secrets for the environments  |
+
+#### About ENV_FILE
+It must be a secret, named '<env>_env_file' (for exemple 'qa_env_file').
+It must contain all variable for the given env, even if they are not secrets.
+Content exemple: 
+```
+ENV=qa
+AUTH_URL=https://auth.dev.bruxless.rocks/
+API_URL=https://api.dev.bruxless.rocks/
+WEBCONSOLE_URL=https://webconsole.dev.bruxless.rocks/
+USERNAME_PATIENT=patient
+PASSWORD_PATIENT=patient
+USERNAME_ADMINFULL=admin_full
+PASSWORD_ADMINFULL=admin_full
+CLIENT_ID=api_test
+CLIENT_SECRET=toto
+```
+
+#### Example
+
+```yaml
+name: API acceptance tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Tested environment"
+        required: true
+        default: 'qa'
+        type: choice
+        options:
+          - qa
+          - staging
+          - prod
+
+jobs:
+  test:
+    uses: bruxless/sre-github-workflow/.github/workflows/js-qa-ci-default.yml@main
+    with:
+      slack_channel_id_qa: "C076K1E0F7F"
+      runner: bruxless-runners
+      container: mcr.microsoft.com/playwright:v1.44.1-jammy
+      environment: ${{ inputs.environment }}
+    secrets:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      ENV_FILE: ${{ secrets[format('{0}_env_file', github.event.inputs.environment)] }}
+```
