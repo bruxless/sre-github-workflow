@@ -17,7 +17,7 @@ on:
         type: string
         required: true
       environment:
-        description: "Tested environment (qa, staging or prod)"
+        description: "Tested environment"
         type: string
         required: true
         default: 'qa'
@@ -60,7 +60,7 @@ jobs:
               "attachments": [
                 {
                   "color": "62a0ea",
-                  "title": "QA ${{ github.run_id }}-${{ github.run_number }} started on ${{ inputs.environment }} env",
+                  "title": "QA ${{ run-name }} started on ${{ inputs.environment }} env",
                   "title_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
                   "fields": [
                     {
@@ -151,7 +151,7 @@ jobs:
               "attachments": [
                 {
                   "color": "57e389",
-                  "title": "QA ${{ github.run_id }}-${{ github.run_number }} succeed on ${{ inputs.environment }} env",
+                  "title": "QA ${{ run-name }} succeed on ${{ inputs.environment }} env",
                   "title_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
                   "fields": [
                     {
@@ -169,8 +169,8 @@ jobs:
                       "short": false
                     },
                     {
-                      "title": "Branch",
-                      "value": "<https://github.com/${{ github.repository }}/tree/${{ github.ref_name }}|${{ github.ref_name }}>",
+                      "title": "Actor",
+                      "value": "${{ github.triggering_actor }}",
                       "short": false
                     }
                   ]
@@ -192,7 +192,7 @@ jobs:
               "attachments": [
                 {
                   "color": "ed333b",
-                  "title": "QA ${{ github.run_id }}-${{ github.run_number }} failed on ${{ inputs.environment }} env",
+                  "title": "QA ${{ run-name }} failed on ${{ inputs.environment }} env",
                   "title_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
                   "fields": [
                     {
@@ -210,8 +210,8 @@ jobs:
                       "short": false
                     },
                     {
-                      "title": "Branch",
-                      "value": "<https://github.com/${{ github.repository }}/tree/${{ github.ref_name }}|${{ github.ref_name }}>",
+                      "title": "Actor",
+                      "value": "${{ github.triggering_actor }}",
                       "short": false
                     }
                   ]
