@@ -236,6 +236,7 @@ PASSWORD_ADMINFULL=admin_full
 CLIENT_ID=api_test
 CLIENT_SECRET=toto
 ```
+Note that one secret must contains all the variables required by all tests projects.
 
 #### Example
 
