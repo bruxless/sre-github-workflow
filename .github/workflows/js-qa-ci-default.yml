@@ -25,9 +25,24 @@ on:
       SLACK_BOT_TOKEN:
         description: "The slack bot token"
         required: true
+# secret must be named <env>_env_file (for exemple qa_env_file) and must contains all variable for the given env.
+# content exemple:
+# ENV=qa
+# AUTH_URL=https://auth.dev.bruxless.rocks/
+# API_URL=https://api.dev.bruxless.rocks/
+# WEBCONSOLE_URL=https://webconsole.dev.bruxless.rocks/
+# USERNAME_PATIENT=patient
+# PASSWORD_PATIENT=patient
+# USERNAME_ADMINFULL=admin_full
+# PASSWORD_ADMINFULL=admin_full
+# CLIENT_ID=api_test
+# CLIENT_SECRET=toto
+      ENV_FILE:
+        description: "The env file, containing variables and secrets for the environments"
+        required: true
 
 jobs:
-  playwright_test:
+  test:
     timeout-minutes: 60
 
     runs-on: ${{ inputs.runner }}
@@ -82,28 +97,20 @@ jobs:
               ]
             }
 
-      - name: tmp1
-        run: echo $ENV_TEST
-      - name: tmp2
+      - name: Set .env file
         run: |
-          env
-      - name: tmp3
-        run: |
-          cat $GITHUB_ENV
-      - name: tmp4
-        run: |
-          base64 -w 0 $GITHUB_ENV
+          cat << EOF > .env
+          ${{ secrets.ENV_FILE }}
+          EOF
 
       - name: Install dependencies
         run: |
           CI=1 \
-          ENV=${{ inputs.environment }} \
           npm ci
 
       - name: Prepare Acceptance Tests
         run: |
           CI=1 \
-          ENV=${{ inputs.environment }} \
           npm run prepare-test
 
       - name: Run Acceptance Tests
