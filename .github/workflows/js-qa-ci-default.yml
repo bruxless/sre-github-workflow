@@ -73,11 +73,6 @@ jobs:
                       "short": true
                     },
                     {
-                      "title": "Repository",
-                      "value": "<https://github.com/${{ github.repository }}|${{ github.repository }}>",
-                      "short": false
-                    },
-                    {
                       "title": "Actor",
                       "value": "${{ github.triggering_actor }}",
                       "short": false
@@ -164,11 +159,6 @@ jobs:
                       "short": true
                     },
                     {
-                      "title": "Repository",
-                      "value": "<https://github.com/${{ github.repository }}|${{ github.repository }}>",
-                      "short": false
-                    },
-                    {
                       "title": "Actor",
                       "value": "${{ github.triggering_actor }}",
                       "short": false
@@ -203,11 +193,6 @@ jobs:
                       "title": "Status",
                       "value": "Failed",
                       "short": true
-                    },
-                    {
-                      "title": "Repository",
-                      "value": "<https://github.com/${{ github.repository }}|${{ github.repository }}>",
-                      "short": false
                     },
                     {
                       "title": "Actor",
