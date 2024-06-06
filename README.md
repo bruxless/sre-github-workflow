@@ -237,6 +237,7 @@ CLIENT_ID=api_test
 CLIENT_SECRET=toto
 ```
 Note that one secret must contains all the variables required by all tests projects.
+As secrets are not "modifiable" but only "replaceable" in github, it may be a very good idea to store content in bitwarden. 
 
 #### Example
 
