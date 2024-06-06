@@ -85,7 +85,9 @@ jobs:
       - name: tmp1
         run: echo $GITHUB_ENV
       - name: tmp2
-        run: cat $GITHUB_ENV
+        run: echo "envTmp=$(cat VERSION)" >> $GITHUB_OUTPUT
+      - name: tmp3
+        run: echo ${{ steps.vars.outputs.envTmp }}
 
       - name: Install dependencies
         run: |
