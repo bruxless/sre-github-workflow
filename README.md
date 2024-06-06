@@ -15,6 +15,10 @@
     * [Javascript web Micro-Service CI](#javascript-web-micro-service-ci)
       * [Parameters](#parameters-2)
       * [Example](#example-2)
+    * [Javascript Test CI](#javascript-test-ci)
+      * [Parameters](#parameters-3)
+      * [About ENV_FILE](#about-env_file)
+      * [Example](#example-3)
 <!-- TOC -->
 
 ## Usage
@@ -201,7 +205,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 ```
 
-### Javascript QA tests
+### Javascript Test CI
 
 [Source](.github/workflows/js-qa-ci-default.yml)
 
