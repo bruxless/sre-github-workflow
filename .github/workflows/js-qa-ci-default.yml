@@ -78,8 +78,8 @@ jobs:
                       "short": false
                     },
                     {
-                      "title": "Branch",
-                      "value": "<https://github.com/${{ github.repository }}/tree/${{ github.ref_name }}|${{ github.ref_name }}>",
+                      "title": "Actor",
+                      "value": "${{ github.actor }}",
                       "short": false
                     }
                   ]
