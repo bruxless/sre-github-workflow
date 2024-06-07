@@ -29,6 +29,7 @@ on:
 # content exemple:
 # ENV=qa
 # AUTH_URL=https://auth.dev.bruxless.rocks/
+# REALM_NAME=bruxless-dev
 # API_URL=https://api.dev.bruxless.rocks/
 # WEBCONSOLE_URL=https://webconsole.dev.bruxless.rocks/
 # USERNAME_PATIENT=patient
