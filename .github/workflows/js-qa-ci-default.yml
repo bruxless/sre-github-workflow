@@ -7,7 +7,6 @@ on:
         description: "The QA Slack channel's id"
         type: string
         required: true
-        default: "C076K1E0F7F"
       runner:
         description: "Runner to use to run tests"
         type: string
