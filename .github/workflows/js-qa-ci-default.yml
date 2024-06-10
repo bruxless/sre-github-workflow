@@ -19,7 +19,6 @@ on:
         description: "Tested environment"
         type: string
         required: true
-        default: 'qa'
     secrets:
       SLACK_BOT_TOKEN:
         description: "The slack bot token"
