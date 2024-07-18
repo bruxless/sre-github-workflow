@@ -360,7 +360,35 @@ jobs:
           name: docker-sbom-${{ inputs.project_name }}-service.json
           path: ${{github.workspace}}/target/docker-sbom-${{ inputs.project_name }}-service.json
 
-      # Dependencies checking
+      # Clair checking
+      - name: Clair scan docker db
+        uses: quay/clair-action@main
+        if: ${{ inputs.enable_database_docker }}
+        with:
+          image-ref: 'bruxless/${{ inputs.project_name }}-db:${{ steps.get_version.outputs.project_version }}'
+          output: "clair_docker_db.sarif"
+          format: 'sarif'
+      - name: Clair upload result docker db
+        if: ${{ always() && inputs.enable_database_docker }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: clair-docker-db
+          path: ${{github.workspace}}/clair_docker_db.sarif
+
+      - name: Clair scan docker service
+        uses: quay/clair-action@main
+        with:
+          image-ref: 'bruxless/${{ inputs.project_name }}-service:${{ steps.get_version.outputs.project_version }}'
+          output: "clair_docker_service.sarif"
+          format: 'sarif'
+      - name: Clair upload result docker service
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: clair-docker-service
+          path: ${{github.workspace}}/clair_docker_service.sarif
+
+      # Trivy Dependencies checking
       - name: Trivy scan docker db
         uses: aquasecurity/trivy-action@0.24.0
         if: ${{ inputs.enable_database_docker }}
@@ -402,7 +430,6 @@ jobs:
           severity: '${{ inputs.trivy_docker_vuln_severity }}'
           scanners: 'vuln'
           timeout: '7m'
-
       - name: Trivy upload result docker service
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
