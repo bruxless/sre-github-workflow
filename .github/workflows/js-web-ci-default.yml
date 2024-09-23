@@ -220,6 +220,7 @@ jobs:
           severity: '${{ inputs.trivy_lib_vuln_severity }}'
           scanners: 'vuln'
           timeout: '7m'
+          github-pat: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Trivy upload result npm
         if: ${{ always() }}
