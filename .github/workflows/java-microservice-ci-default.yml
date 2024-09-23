@@ -401,6 +401,7 @@ jobs:
           severity: '${{ inputs.trivy_docker_vuln_severity }}'
           scanners: 'vuln'
           timeout: '7m'
+          github-pat: ${{ secrets.GITHUB_TOKEN }}
       # Can be deleted when this issue is closed : https://github.com/aquasecurity/trivy-action/issues/228
       - name: Check docker db trivy results
         if: inputs.enable_trivy_exit && inputs.enable_database_docker
@@ -430,6 +431,7 @@ jobs:
           severity: '${{ inputs.trivy_docker_vuln_severity }}'
           scanners: 'vuln'
           timeout: '7m'
+          github-pat: ${{ secrets.GITHUB_TOKEN }}
       - name: Trivy upload result docker service
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
