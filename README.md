@@ -154,7 +154,7 @@ jobs:
 
 | Parameter Name              | Type   | Required | Description                                                                                |
 |-----------------------------|--------|----------|--------------------------------------------------------------------------------------------|
-| node_version                | String | false    | The Node version (default to 16)                                                           |
+| node_version                | String | false    | The Node version (default to 20)                                                           |
 | slack_channel_id_ci         | String | true     | The CI Slack channel's id                                                                  |
 | slack_channel_id_ci_release | String | true     | The CI release Slack channel's id                                                          |
 | sonar_organization          | String | true     | The sonar organization                                                                     |

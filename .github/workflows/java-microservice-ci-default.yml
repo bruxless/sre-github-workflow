@@ -230,7 +230,7 @@ jobs:
 
       # Dependencies checking
       - name: Trivy scan maven
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@0.26.0
         with:
           scan-type: 'fs'
           ignore-unfixed: false
@@ -391,7 +391,7 @@ jobs:
 
       # Trivy Dependencies checking
       - name: Trivy scan docker db
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@0.26.0
         if: ${{ inputs.enable_database_docker }}
         with:
           image-ref: 'bruxless/${{ inputs.project_name }}-db:${{ steps.get_version.outputs.project_version }}'
@@ -405,7 +405,7 @@ jobs:
           github-pat: ${{ secrets.GITHUB_TOKEN }}
       # Can be deleted when this issue is closed : https://github.com/aquasecurity/trivy-action/issues/228
       - name: Check docker db trivy results
-        if: inputs.enable_trivy_exit && inputs.enable_database_docker
+        if: inputs.enable_database_docker
         run: |
           if grep -qE 'HIGH|CRITICAL' trivy_docker_db.sarif; then
             echo "Vulnerabilities found"
@@ -422,7 +422,7 @@ jobs:
           path: ${{github.workspace}}/trivy_docker_db.sarif
 
       - name: Trivy scan docker service
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@0.26.0
         with:
           image-ref: 'bruxless/${{ inputs.project_name }}-service:${{ steps.get_version.outputs.project_version }}'
           ignore-unfixed: true
@@ -469,7 +469,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ inputs.aws_region }}
-      
+
       # Push docker on ECR if master or release branches
       - name: Push db image on ECR
         if: |

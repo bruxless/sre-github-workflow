@@ -55,10 +55,9 @@ jobs:
           fetch-depth: 0
 
       # Setup and uses
-      - name: Set up node ${{ inputs.node_version }}
+      - name: Set up node
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ inputs.node_version }}
           cache: npm
 
       # Slack message
