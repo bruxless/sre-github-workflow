@@ -211,14 +211,15 @@ jobs:
 
 #### Parameters
 
-| Parameter Name      | Type   | Required | Description                                                          |
-|---------------------|--------|----------|----------------------------------------------------------------------|
-| slack_channel_id_qa | String | true     | The CI Slack channel's id                                            |
-| runner              | String | true     | Runner to use to run tests (usually 'bruxless-runner')               |
-| container           | String | true     | Container to use to run tests                                        |
-| environment         | String | true     | Tested environment (qa, staging or prod)                             |
-| SLACK_BOT_TOKEN     | Secret | true     | The slack bot token                                                  |
-| ENV_FILE            | Secret | true     | The env file, containing variables and secrets for the environments  |
+| Parameter Name                       | Type    | Required | Description                                                         |
+|--------------------------------------|---------|----------|---------------------------------------------------------------------|
+| slack_channel_id_qa                  | String  | true     | The CI Slack channel's id                                           |
+| runner                               | String  | true     | Runner to use to run tests (usually 'bruxless-runner')              |
+| container                            | String  | true     | Container to use to run tests                                       |
+| environment                          | String  | true     | Tested environment (qa, staging or prod)                            |
+| enabled_deployments_version_fetching | Boolean | false    | Enabled deployments version fetching                                |
+| SLACK_BOT_TOKEN                      | Secret  | true     | The slack bot token                                                 |
+| ENV_FILE                             | Secret  | true     | The env file, containing variables and secrets for the environments |
 
 #### About ENV_FILE
 It must be a secret, named '<env>_env_file' (for exemple 'qa_env_file').
@@ -226,6 +227,7 @@ It must contain all variable for the given env, even if they are not secrets.
 Content exemple: 
 ```
 ENV=qa
+NAMESPACE=bruxless-dev
 AUTH_URL=https://auth.dev.bruxless.rocks/
 REALM_NAME=bruxless-dev
 API_URL=https://api.dev.bruxless.rocks/

@@ -19,6 +19,10 @@ on:
         description: "Tested environment"
         type: string
         required: true
+      enabled_deployments_version_fetching:
+        description: "Enabled deployments version fetching"
+        type: boolean
+        default: true
     secrets:
       SLACK_BOT_TOKEN:
         description: "The slack bot token"
@@ -26,6 +30,7 @@ on:
 # secret must be named <env>_env_file (for exemple qa_env_file) and must contains all variable for the given env.
 # content exemple:
 # ENV=qa
+# KUBE_NAMESPACE=bruxless-dev
 # AUTH_URL=https://auth.dev.bruxless.rocks/
 # REALM_NAME=bruxless-dev
 # API_URL=https://api.dev.bruxless.rocks/
@@ -41,12 +46,44 @@ on:
         required: true
 
 jobs:
+  retrieveDeployments:
+    timeout-minutes: 10
+    runs-on: ${{ inputs.runner }}
+    container: "bitnami/kubectl:1.31"
+
+    steps:
+      - name: Set .env file
+        if: ${{ inputs.enabled_deployments_version_fetching == true }}
+        run: |
+          cat << EOF > .env
+          ${{ secrets.ENV_FILE }}
+          EOF
+
+      - name: Extract environment
+        if: ${{ inputs.enabled_deployments_version_fetching == true }}
+        id: get_env
+        run: |
+          echo "environment=$(grep "^KUBE_NAMESPACE=" .env | cut -d '=' -f2)" >> $GITHUB_OUTPUT
+
+      - name: Retrieve deployments versions
+        if: ${{ inputs.enabled_deployments_version_fetching == true }}
+        run: |
+          kubectl -n ${{ steps.get_env.outputs.environment }} get deployments,statefulsets -o json | jq '[.items[] | select(.metadata.labels."app.kubernetes.io/managed-by"=="Helm") | {name: .metadata.name, chartVersion: .metadata.labels."helm.sh/chart", version: .metadata.labels."app.kubernetes.io/version"}]'  > deployment-versions.json
+
+      - name: Upload deployments versions as artefact
+        if: ${{ inputs.enabled_deployments_version_fetching == true }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-versions
+          path: deployment-versions.json
+
   test:
     timeout-minutes: 60
 
     runs-on: ${{ inputs.runner }}
     container: ${{ inputs.container }}
 
+    needs: retrieveDeployments
     steps:
       # Checkout project
       - name: Checkout
@@ -100,6 +137,13 @@ jobs:
           cat << EOF > .env
           ${{ secrets.ENV_FILE }}
           EOF
+
+      - name: Download deployments versions as artefact
+        if: ${{ inputs.enabled_deployments_version_fetching == true }}
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: deployment-versions
 
       - name: Install dependencies
         run: |
