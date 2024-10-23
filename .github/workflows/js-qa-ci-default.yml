@@ -97,6 +97,13 @@ jobs:
         with:
           cache: npm
 
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4.0.0
+        with:
+          java-version: 21
+          distribution: 'temurin'
+          cache: maven
+
       # Slack message
       - name: Slack - ci - started
         id: slack
