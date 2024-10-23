@@ -168,6 +168,7 @@ jobs:
           npm run test
 
       - name: Post Acceptance Tests
+        if: ${{ !cancelled() }}
         run: |
           CI=1 \
           npm run post-test
