@@ -106,10 +106,10 @@ jobs:
           CI=1 \
           npm ci
 
-      - name: Prepare Acceptance Tests
+      - name: Pre Acceptance Tests
         run: |
           CI=1 \
-          npm run prepare-test
+          npm run pre-test
 
       - name: Run Acceptance Tests
         run:  |
@@ -117,19 +117,17 @@ jobs:
           ENV=${{ inputs.environment }} \
           npm run test
 
+      - name: Post Acceptance Tests
+        run: |
+          CI=1 \
+          npm run post-test
+
       - name: Upload Acceptance Results
         uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: test-report-html
-          path: target/test-report/
-          retention-days: 30
-      - name: Upload Acceptance Results
-        uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: test-report-json
-          path: target/test-report.json
+          name: test-reports
+          path: target/test-reports/
           retention-days: 30
 
       - name: NodeJS lint
