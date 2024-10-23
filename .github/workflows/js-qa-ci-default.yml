@@ -68,7 +68,7 @@ jobs:
       - name: Retrieve deployments versions
         if: ${{ inputs.enabled_deployments_version_fetching == true }}
         run: |
-          kubectl -n ${{ steps.get_env.outputs.environment }} get deployments,statefulsets -o json | jq '[.items[] | select(.metadata.labels."app.kubernetes.io/managed-by"=="Helm") | {name: .metadata.name, chartVersion: .metadata.labels."helm.sh/chart", version: .metadata.labels."app.kubernetes.io/version"}]'  > deployment-versions.json
+          kubectl -n ${{ steps.get_env.outputs.environment }} get deployments,statefulsets,cronjobs,jobs -o json | jq '[.items[] | select(.metadata.labels."app.kubernetes.io/managed-by"=="Helm") | {name: .metadata.name, chartVersion: .metadata.labels."helm.sh/chart", version: .metadata.labels."app.kubernetes.io/version"}]'  > deployment-versions.json
 
       - name: Upload deployments versions as artefact
         if: ${{ inputs.enabled_deployments_version_fetching == true }}
