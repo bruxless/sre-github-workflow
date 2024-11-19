@@ -227,7 +227,7 @@ It must contain all variable for the given env, even if they are not secrets.
 Content exemple: 
 ```
 ENV=qa
-NAMESPACE=bruxless-dev
+KUBE_NAMESPACE=bruxless-dev
 AUTH_URL=https://auth.dev.bruxless.rocks/
 REALM_NAME=bruxless-dev
 API_URL=https://api.dev.bruxless.rocks/
