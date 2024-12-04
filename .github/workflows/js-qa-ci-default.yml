@@ -106,37 +106,34 @@ jobs:
       # Slack message
       - name: Slack - ci - started
         id: slack
-        uses: slackapi/slack-github-action@v1.27.0
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN}}
+        uses: slackapi/slack-github-action@v2.0.0
         with:
-          channel-id: ${{ inputs.slack_channel_id_qa }}
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "attachments": [
-                {
-                  "color": "62a0ea",
-                  "title": "QA Job '${{ github.workflow }}' started on ${{ inputs.environment }} env",
-                  "title_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-                  "fields": [
-                    {
-                      "value": ":the_horns:",
-                      "short": true
-                    },
-                    {
-                      "title": "Status",
-                      "value": "In Progress",
-                      "short": true
-                    },
-                    {
-                      "title": "Actor",
-                      "value": "${{ github.triggering_actor }}",
-                      "short": false
-                    }
-                  ]
-                }
-              ]
-            }
+            channel: ${{ env.slack_channel_id_ci }}
+            attachments:
+              - color: "#62a0ea"
+                fallback: "QA Job '${{ github.workflow }}' started on ${{ inputs.environment }} env"
+                blocks:
+                  - type: header
+                    text:
+                      type: plain_text
+                      text: ":the_horns:${{ github.repository }}"
+                      emoji: true
+                  - type: section
+                    text:
+                      text: "QA Job '<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>' started on ${{ inputs.environment }} env"
+                      type: mrkdwn
+                    fields:
+                      - type: mrkdwn
+                        text: "*Status*"
+                      - type: mrkdwn
+                        text: "*Actor*"
+                      - type: mrkdwn
+                        text: "In progress"
+                      - type: mrkdwn
+                        text: "${{ github.triggering_actor }}"  
 
       - name: Set .env file
         run: |
@@ -201,71 +198,63 @@ jobs:
       # Slack message if succeed
       - name: Slack - ci - succeed
         if: success()
-        uses: slackapi/slack-github-action@v1.27.0
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN}}
+        uses: slackapi/slack-github-action@v2.0.0
         with:
-          channel-id: ${{ inputs.slack_channel_id_qa }}
-          update-ts: ${{ steps.slack.outputs.ts }}
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "attachments": [
-                {
-                  "color": "57e389",
-                  "title": "QA Job '${{ github.workflow }}' succeed on ${{ inputs.environment }} env",
-                  "title_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-                  "fields": [
-                    {
-                      "value": ":clap:",
-                      "short": true
-                    },
-                    {
-                      "title": "Status",
-                      "value": "Succeed",
-                      "short": true
-                    },
-                    {
-                      "title": "Actor",
-                      "value": "${{ github.triggering_actor }}",
-                      "short": false
-                    }
-                  ]
-                }
-              ]
-            }
+            channel: ${{ env.slack_channel_id_ci }}
+            attachments:
+              - color: "#57e389"
+                fallback: "QA Job '${{ github.workflow }}' succeed on ${{ inputs.environment }} env"
+                blocks:
+                  - type: header
+                    text:
+                      type: plain_text
+                      text: ":clap:${{ github.repository }}"
+                      emoji: true
+                  - type: section
+                    text:
+                      text: "QA Job '<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>' succeed on ${{ inputs.environment }} env"
+                      type: mrkdwn
+                    fields:
+                      - type: mrkdwn
+                        text: "*Status*"
+                      - type: mrkdwn
+                        text: "*Actor*"
+                      - type: mrkdwn
+                        text: "Succeed"
+                      - type: mrkdwn
+                        text: "${{ github.triggering_actor }}"              
 
       # Slack message if failed
       - name: Slack - ci - failed
         if: failure()
-        uses: slackapi/slack-github-action@v1.27.0
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN}}
+        uses: slackapi/slack-github-action@v2.0.0
         with:
-          channel-id: ${{ inputs.slack_channel_id_qa }}
-          update-ts: ${{ steps.slack.outputs.ts }}
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "attachments": [
-                {
-                  "color": "ed333b",
-                  "title": "QA Job '${{ github.workflow }}' failed on ${{ inputs.environment }} env",
-                  "title_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-                  "fields": [
-                    {
-                      "value": ":-1:",
-                      "short": true
-                    },
-                    {
-                      "title": "Status",
-                      "value": "Failed",
-                      "short": true
-                    },
-                    {
-                      "title": "Actor",
-                      "value": "${{ github.triggering_actor }}",
-                      "short": false
-                    }
-                  ]
-                }
-              ]
-            }
+            channel: ${{ env.slack_channel_id_ci }}
+            attachments:
+              - color: "#ed333b"
+                fallback: "QA Job '${{ github.workflow }}' failed on ${{ inputs.environment }} env"
+                blocks:
+                  - type: header
+                    text:
+                      type: plain_text
+                      text: ":clap:${{ github.repository }}"
+                      emoji: true
+                  - type: section
+                    text:
+                      text: "QA Job '<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>' failed on ${{ inputs.environment }} env"
+                      type: mrkdwn
+                    fields:
+                      - type: mrkdwn
+                        text: "*Status*"
+                      - type: mrkdwn
+                        text: "*Actor*"
+                      - type: mrkdwn
+                        text: "Failed"
+                      - type: mrkdwn
+                        text: "${{ github.triggering_actor }}"
