@@ -104,7 +104,7 @@ jobs:
           method: chat.postMessage
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            channel: ${{ env.slack_channel_id_ci }}
+            channel: ${{ inputs.slack_channel_id_ci }}
             attachments:
               - color: "#62a0ea"
                 fallback: "Build ${{ github.run_id }}-${{ github.run_number }} started"
@@ -438,7 +438,7 @@ jobs:
           method: chat.update
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            channel: ${{ env.slack_channel_id_ci }}
+            channel: ${{ inputs.slack_channel_id_ci }}
             ts: "${{ steps.slack.outputs.ts }}"
             attachments:
               - color: "#57e389"
@@ -471,7 +471,7 @@ jobs:
           method: chat.update
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            channel: ${{ env.slack_channel_id_ci }}
+            channel: ${{ inputs.slack_channel_id_ci }}
             ts: "${{ steps.slack.outputs.ts }}"
             attachments:
               - color: "#ed333b"
@@ -541,7 +541,7 @@ jobs:
           method: chat.postMessage
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            channel: ${{ env.slack_channel_id_ci_release }}
+            channel: ${{ inputs.slack_channel_id_ci_release }}
             attachments:
               - color: "#57e389"
                 fallback: "Release ${{ steps.get_version.outputs.project_version }} available"
@@ -576,7 +576,7 @@ jobs:
           method: chat.postMessage
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            channel: ${{ env.slack_channel_id_ci_release }}
+            channel: ${{ inputs.slack_channel_id_ci_release }}
             attachments:
               - color: "#ed333b"
                 fallback: "Release ${{ steps.get_version.outputs.project_version }} failed"

@@ -111,7 +111,7 @@ jobs:
           method: chat.postMessage
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            channel: ${{ env.slack_channel_id_ci }}
+            channel: ${{ inputs.slack_channel_id_ci }}
             attachments:
               - color: "#62a0ea"
                 fallback: "QA Job '${{ github.workflow }}' started on ${{ inputs.environment }} env"
@@ -203,7 +203,7 @@ jobs:
           method: chat.postMessage
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            channel: ${{ env.slack_channel_id_ci }}
+            channel: ${{ inputs.slack_channel_id_ci }}
             attachments:
               - color: "#57e389"
                 fallback: "QA Job '${{ github.workflow }}' succeed on ${{ inputs.environment }} env"
@@ -235,7 +235,7 @@ jobs:
           method: chat.postMessage
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            channel: ${{ env.slack_channel_id_ci }}
+            channel: ${{ inputs.slack_channel_id_ci }}
             attachments:
               - color: "#ed333b"
                 fallback: "QA Job '${{ github.workflow }}' failed on ${{ inputs.environment }} env"
