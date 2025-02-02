@@ -63,7 +63,7 @@ jobs:
 
       # Setup Java
       - name: Set up JDK ${{ inputs.java_distribution }}/${{ inputs.java_version }}
-        uses: actions/setup-java@v4.6.0
+        uses: actions/setup-java@v4.7.0
         with:
           java-version: ${{ inputs.java_version }}
           distribution: ${{ inputs.java_distribution }}
