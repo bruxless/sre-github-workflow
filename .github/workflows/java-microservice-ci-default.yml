@@ -222,7 +222,7 @@ jobs:
 
       # Dependencies checking
       - name: Trivy scan maven
-        uses: aquasecurity/trivy-action@0.29.0
+        uses: aquasecurity/trivy-action@0.30.0
         env:
           TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db:2
           TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db:1
@@ -386,7 +386,7 @@ jobs:
 
       # Trivy Dependencies checking
       - name: Trivy scan docker db
-        uses: aquasecurity/trivy-action@0.29.0
+        uses: aquasecurity/trivy-action@0.30.0
         if: ${{ inputs.enable_database_docker }}
         env:
           TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db:2
@@ -421,7 +421,7 @@ jobs:
           path: ${{github.workspace}}/trivy_docker_db.sarif
 
       - name: Trivy scan docker service
-        uses: aquasecurity/trivy-action@0.29.0
+        uses: aquasecurity/trivy-action@0.30.0
         env:
           TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db:2
           TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db:1
