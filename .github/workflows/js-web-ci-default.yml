@@ -507,7 +507,7 @@ jobs:
         run: |
           sed -n "/\[${{ steps.get_version.outputs.project_version }}\]/,/## \[/p" CHANGELOG.md | sed -e '1d' -e '$d' > part_changelog.md
       - name: Create GitHub release
-        uses: softprops/action-gh-release@v2.2.1
+        uses: softprops/action-gh-release@v2.2.2
         if:
           success() &&
           (
