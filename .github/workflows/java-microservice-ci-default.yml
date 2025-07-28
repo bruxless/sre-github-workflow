@@ -326,7 +326,7 @@ jobs:
 
       # Docker SBOM
       - name: Generate sbom docker db
-        uses: anchore/sbom-action@v0.20.2
+        uses: anchore/sbom-action@v0.20.4
         if: ${{ inputs.enable_database_docker }}
         with:
           image: docker.io/bruxless/${{ inputs.project_name }}-db:${{ steps.get_version.outputs.project_version }}
@@ -342,7 +342,7 @@ jobs:
           path: ${{github.workspace}}/target/docker-sbom-${{ inputs.project_name }}-db.json
 
       - name: Generate sbom docker service
-        uses: anchore/sbom-action@v0.20.2
+        uses: anchore/sbom-action@v0.20.4
         with:
           image: docker.io/bruxless/${{ inputs.project_name }}-service:${{ steps.get_version.outputs.project_version }}
           format: cyclonedx-json
