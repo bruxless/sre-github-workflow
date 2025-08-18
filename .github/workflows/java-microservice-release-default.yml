@@ -56,7 +56,7 @@ jobs:
           private_key: ${{ secrets.BRUXLESS_GH_APP_KEY }}
 
       ### Destination branch part
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           token: ${{ steps.bruxless-action.outputs.token }}
