@@ -245,14 +245,14 @@ jobs:
 
       # Lint distribution files (docker and helm)
       - name: Docker lint service
-        uses: hadolint/hadolint-action@v3.2.0
+        uses: hadolint/hadolint-action@v3.3.0
         with:
           dockerfile: target/docker/service.Dockerfile
           failure-threshold: warn
           output-file: hadolint-service.sarif
           format: sarif
       - name: Docker lint metrics
-        uses: hadolint/hadolint-action@v3.2.0
+        uses: hadolint/hadolint-action@v3.3.0
         with:
           dockerfile: target/docker/metrics.Dockerfile
           failure-threshold: warn
