@@ -253,14 +253,14 @@ jobs:
 
       # Lint distribution files (docker and helm)
       - name: Docker lint base-java${{ inputs.java_version }}
-        uses: hadolint/hadolint-action@v3.2.0
+        uses: hadolint/hadolint-action@v3.3.0
         with:
           dockerfile: ${{ inputs.project_name }}-service/target/base-java${{ inputs.java_version }}.Dockerfile
           failure-threshold: warn
           output-file: hadolint-base-java${{ inputs.java_version }}.sarif
           format: sarif
       - name: Docker lint base-liquibase
-        uses: hadolint/hadolint-action@v3.2.0
+        uses: hadolint/hadolint-action@v3.3.0
         if: inputs.enable_database_docker
         with:
           dockerfile: ${{ inputs.project_name }}-service/target/base-liquibase.Dockerfile
@@ -268,7 +268,7 @@ jobs:
           output-file: hadolint-base-liquibase.sarif
           format: sarif
       - name: Docker lint db
-        uses: hadolint/hadolint-action@v3.2.0
+        uses: hadolint/hadolint-action@v3.3.0
         if: inputs.enable_database_docker
         with:
           dockerfile: ${{ inputs.project_name }}-service/target/db.Dockerfile
@@ -276,7 +276,7 @@ jobs:
           output-file: hadolint-db.sarif
           format: sarif
       - name: Docker lint service
-        uses: hadolint/hadolint-action@v3.2.0
+        uses: hadolint/hadolint-action@v3.3.0
         with:
           dockerfile: ${{ inputs.project_name }}-service/target/service.Dockerfile
           failure-threshold: warn
