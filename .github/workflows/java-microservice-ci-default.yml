@@ -256,7 +256,7 @@ jobs:
         uses: hadolint/hadolint-action@v3.3.0
         with:
           dockerfile: ${{ inputs.project_name }}-service/target/base-java${{ inputs.java_version }}.Dockerfile
-          failure-threshold: warn
+          failure-threshold: warning
           output-file: hadolint-base-java${{ inputs.java_version }}.sarif
           format: sarif
       - name: Docker lint base-liquibase
@@ -264,7 +264,7 @@ jobs:
         if: inputs.enable_database_docker
         with:
           dockerfile: ${{ inputs.project_name }}-service/target/base-liquibase.Dockerfile
-          failure-threshold: warn
+          failure-threshold: warning
           output-file: hadolint-base-liquibase.sarif
           format: sarif
       - name: Docker lint db
@@ -272,14 +272,14 @@ jobs:
         if: inputs.enable_database_docker
         with:
           dockerfile: ${{ inputs.project_name }}-service/target/db.Dockerfile
-          failure-threshold: warn
+          failure-threshold: warning
           output-file: hadolint-db.sarif
           format: sarif
       - name: Docker lint service
         uses: hadolint/hadolint-action@v3.3.0
         with:
           dockerfile: ${{ inputs.project_name }}-service/target/service.Dockerfile
-          failure-threshold: warn
+          failure-threshold: warning
           output-file: hadolint-service.sarif
           format: sarif
 

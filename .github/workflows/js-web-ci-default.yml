@@ -248,14 +248,14 @@ jobs:
         uses: hadolint/hadolint-action@v3.3.0
         with:
           dockerfile: target/docker/service.Dockerfile
-          failure-threshold: warn
+          failure-threshold: warning
           output-file: hadolint-service.sarif
           format: sarif
       - name: Docker lint metrics
         uses: hadolint/hadolint-action@v3.3.0
         with:
           dockerfile: target/docker/metrics.Dockerfile
-          failure-threshold: warn
+          failure-threshold: warning
           output-file: hadolint-metrics.sarif
           format: sarif
       - name: Helm lint
