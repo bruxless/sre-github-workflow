@@ -83,7 +83,6 @@ jobs:
   ci:
     runs-on: ubuntu-22.04
     permissions:
-      actions: read
       contents: write
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
