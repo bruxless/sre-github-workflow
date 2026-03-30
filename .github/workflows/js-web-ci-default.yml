@@ -87,7 +87,7 @@ jobs:
           node-version: ${{ inputs.node_version }}
           cache: npm
       - name: Set up helm
-        uses: azure/setup-helm@v4
+        uses: azure/setup-helm@v5
 
       - name: Cache SonarCloud packages
         uses: actions/cache@v5

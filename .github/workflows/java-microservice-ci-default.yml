@@ -105,7 +105,7 @@ jobs:
 
       # Setup helm
       - name: Set up helm
-        uses: azure/setup-helm@v4
+        uses: azure/setup-helm@v5
 
       # Cache Sonarcloud packages
       - name: Cache SonarCloud packages
