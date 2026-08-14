@@ -438,7 +438,7 @@ jobs:
           github-pat: ${{ secrets.GITHUB_TOKEN }}
       # Can be deleted when this issue is closed : https://github.com/aquasecurity/trivy-action/issues/228
       - name: Check docker service trivy results
-      - if: ${{ always() }}
+        if: ${{ always() }}
         run: |
           if grep -qE 'HIGH|CRITICAL' trivy_docker_service.sarif; then
             echo "Vulnerabilities found"
