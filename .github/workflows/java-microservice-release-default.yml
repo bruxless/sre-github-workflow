@@ -9,10 +9,10 @@ on:
         required: false
         default: "temurin"
       java_version:
-        description: "The java version (default to 17)"
+        description: "The java version (default to 21)"
         type: string
         required: false
-        default: "17"
+        default: "21"
       source_branch:
         description: "The source branch, that will contains the next release"
         type: string

@@ -4,10 +4,10 @@ on:
   workflow_call:
     inputs:
       node_version:
-        description: "The node version (default to 20)"
+        description: "The node version (default to 24)"
         type: string
         required: false
-        default: "20"
+        default: "24"
       slack_channel_id_ci:
         description: "The CI Slack channel's id"
         type: string
