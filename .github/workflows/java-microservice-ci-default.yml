@@ -236,16 +236,6 @@ jobs:
           scanners: 'vuln'
           timeout: '7m'
           github-pat: ${{ secrets.GITHUB_TOKEN }}
-      # Can be deleted when this issue is closed : https://github.com/aquasecurity/trivy-action/issues/228
-      - name: Check maven trivy results
-        run: |
-          if grep -qE 'HIGH|CRITICAL' trivy_maven.sarif; then
-            echo "Vulnerabilities found"
-            exit 1
-          else
-            echo "No significant vulnerabilities found"
-            exit 0
-          fi
       # Save trivy result as artifact
       - name: Trivy upload result maven
         if: ${{ always() }}
