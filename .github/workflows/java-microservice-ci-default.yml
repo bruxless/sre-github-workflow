@@ -422,6 +422,7 @@ jobs:
 
       - name: Trivy scan docker service
         uses: aquasecurity/trivy-action@v0.36.0
+        if: ${{ always() }}
         env:
           TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db:2
           TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db:1
@@ -437,7 +438,7 @@ jobs:
           github-pat: ${{ secrets.GITHUB_TOKEN }}
       # Can be deleted when this issue is closed : https://github.com/aquasecurity/trivy-action/issues/228
       - name: Check docker service trivy results
-        if: inputs.enable_database_docker
+      - if: ${{ always() }}
         run: |
           if grep -qE 'HIGH|CRITICAL' trivy_docker_service.sarif; then
             echo "Vulnerabilities found"
